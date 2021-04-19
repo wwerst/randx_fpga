@@ -67,21 +67,21 @@ class InstructionBuilder(object):
         self._name_to_cls = {
             "IADD_RS": IADD_RS_Inst,
             "IADD_M": IADD_M_Inst,
-            "ISUB_R": NOP_Inst,
-            "ISUB_M": NOP_Inst,
-            "IMUL_R": NOP_Inst,
-            "IMUL_M": NOP_Inst,
-            "IMULH_R": NOP_Inst,
-            "IMULH_M": NOP_Inst,
-            "ISMULH_R": NOP_Inst,
-            "ISMULH_M": NOP_Inst,
-            "IMUL_RCP": NOP_Inst,
-            "INEG_R": NOP_Inst,
-            "IXOR_R": NOP_Inst,
-            "IXOR_M": NOP_Inst,
-            "IROR_R": NOP_Inst,
-            "IROL_R": NOP_Inst,
-            "ISWAP_R": NOP_Inst,
+            "ISUB_R": ISUB_R_Inst,
+            "ISUB_M": ISUB_M_Inst,
+            "IMUL_R": IMUL_R_Inst,
+            "IMUL_M": IMUL_M_Inst,
+            "IMULH_R": IMULH_R_Inst,
+            "IMULH_M": IMULH_M_Inst,
+            "ISMULH_R": ISMULH_R_Inst,
+            "ISMULH_M": ISMULH_M_Inst,
+            "IMUL_RCP": IMUL_RCP_Inst,
+            "INEG_R": INEG_R_Inst,
+            "IXOR_R": IXOR_R_Inst,
+            "IXOR_M": IXOR_M_Inst,
+            "IROR_R": IROR_R_Inst,
+            "IROL_R": IROL_R_Inst,
+            "ISWAP_R": ISWAP_R_Inst,
             "FSWAP_R": NOP_Inst,
             "FADD_R": NOP_Inst,
             "FADD_M": NOP_Inst,
@@ -141,7 +141,8 @@ class Program(object):
 
 class BaseInstByteCode(ABC):
 
-    def __init__(self):
+    def __init__(self, inst_struct=None):
+        self.inst_struct = inst_struct
         self.idst = None
         self.fdst = None
         self.isrc = None
@@ -157,6 +158,25 @@ class BaseInstByteCode(ABC):
     @abstractmethod
     def __repr__(self):
         raise NotImplementedError()
+
+    def add_dependencies(self, dep_nodes, inst_num):
+        if self.idst is not None:
+            # idst is the written dependency
+            r_nodes = dep_nodes.r_nodes
+            idst_target_name = f'r{self.idst}_{inst_num}'
+            idst_target = dep_nodes.dig.node(
+                idst_target_name,
+                f"{inst_num}: {self}")
+            if self.isrc is not None:
+                dep_nodes.dig.edge(r_nodes[self.isrc], idst_target_name)
+            dep_nodes.dig.edge(r_nodes[self.idst], idst_target_name)
+            r_nodes[self.idst] = idst_target_name
+        elif self.fdst is not None:
+            # fdst is the written dependency
+            pass
+        elif self.fp_mode_src is not None:
+            # fp_mode_src is the written dependency
+            pass
 
 
 REGISTERS_COUNT = 8
@@ -209,6 +229,231 @@ class IADD_M_Inst(BaseInstByteCode):
     __repr__ = __str__
 
 
+class ISUB_R_Inst(BaseInstByteCode):
+
+    def __init__(self, inst_struct):
+        super().__init__()
+        self.idst = inst_struct.dst % REGISTERS_COUNT
+        self.isrc = inst_struct.src % REGISTERS_COUNT
+
+    def __str__(self):
+        return f"ISUB_R R{self.idst}, R{self.isrc}"
+
+    __repr__ = __str__
+
+
+class ISUB_M_Inst(BaseInstByteCode):
+
+    def __init__(self, inst_struct):
+        super().__init__()
+        self.idst = inst_struct.dst % REGISTERS_COUNT
+        self.isrc = inst_struct.src % REGISTERS_COUNT
+        self.cache_level = get_int_read_sp_level(inst_struct)
+
+    def __str__(self):
+        return f"ISUB_M R{self.idst}, L{self.cache_level}[mem]"
+
+    __repr__ = __str__
+
+
+class IMUL_R_Inst(BaseInstByteCode):
+
+    def __init__(self, inst_struct):
+        super().__init__()
+        self.idst = inst_struct.dst % REGISTERS_COUNT
+        self.isrc = inst_struct.src % REGISTERS_COUNT
+
+    def __str__(self):
+        return f"IMUL_R R{self.idst}, R{self.isrc}"
+
+    __repr__ = __str__
+
+
+class IMUL_M_Inst(BaseInstByteCode):
+
+    def __init__(self, inst_struct):
+        super().__init__()
+        self.idst = inst_struct.dst % REGISTERS_COUNT
+        self.isrc = inst_struct.src % REGISTERS_COUNT
+        self.cache_level = get_int_read_sp_level(inst_struct)
+
+    def __str__(self):
+        return f"IMUL_M R{self.idst}, L{self.cache_level}[mem]"
+
+    __repr__ = __str__
+
+
+class IMULH_R_Inst(BaseInstByteCode):
+
+    def __init__(self, inst_struct):
+        super().__init__()
+        self.idst = inst_struct.dst % REGISTERS_COUNT
+        self.isrc = inst_struct.src % REGISTERS_COUNT
+
+    def __str__(self):
+        return f"IMULH_R R{self.idst}, R{self.isrc}"
+
+    __repr__ = __str__
+
+
+class IMULH_M_Inst(BaseInstByteCode):
+
+    def __init__(self, inst_struct):
+        super().__init__()
+        self.idst = inst_struct.dst % REGISTERS_COUNT
+        self.isrc = inst_struct.src % REGISTERS_COUNT
+        self.cache_level = get_int_read_sp_level(inst_struct)
+
+    def __str__(self):
+        return f"IMULH_M R{self.idst}, L{self.cache_level}[mem]"
+
+    __repr__ = __str__
+
+
+class ISMULH_R_Inst(BaseInstByteCode):
+
+    def __init__(self, inst_struct):
+        super().__init__()
+        self.idst = inst_struct.dst % REGISTERS_COUNT
+        self.isrc = inst_struct.src % REGISTERS_COUNT
+
+    def __str__(self):
+        return f"ISMULH_R R{self.idst}, R{self.isrc}"
+
+    __repr__ = __str__
+
+
+class ISMULH_M_Inst(BaseInstByteCode):
+
+    def __init__(self, inst_struct):
+        super().__init__()
+        self.idst = inst_struct.dst % REGISTERS_COUNT
+        self.isrc = inst_struct.src % REGISTERS_COUNT
+        self.cache_level = get_int_read_sp_level(inst_struct)
+
+    def __str__(self):
+        return f"ISMULH_M R{self.idst}, L{self.cache_level}[mem]"
+
+    __repr__ = __str__
+
+
+class IMUL_RCP_Inst(BaseInstByteCode):
+
+    def __init__(self, inst_struct):
+        super().__init__(inst_struct)
+        self.idst = inst_struct.dst % REGISTERS_COUNT
+
+    def __str__(self):
+        return f"IMUL_RCP R{self.idst}, {self.inst_struct.imm32}"
+
+    __repr__ = __str__
+
+
+class INEG_R_Inst(BaseInstByteCode):
+
+    def __init__(self, inst_struct):
+        super().__init__()
+        self.idst = inst_struct.dst % REGISTERS_COUNT
+
+    def __str__(self):
+        return f"INEG_R R{self.idst}"
+
+    __repr__ = __str__
+
+
+class IXOR_R_Inst(BaseInstByteCode):
+
+    def __init__(self, inst_struct):
+        super().__init__()
+        self.idst = inst_struct.dst % REGISTERS_COUNT
+        self.isrc = inst_struct.src % REGISTERS_COUNT
+
+    def __str__(self):
+        return f"IXOR_R R{self.idst}, R{self.isrc}"
+
+    __repr__ = __str__
+
+
+class IXOR_M_Inst(BaseInstByteCode):
+
+    def __init__(self, inst_struct):
+        super().__init__()
+        self.idst = inst_struct.dst % REGISTERS_COUNT
+        self.isrc = inst_struct.src % REGISTERS_COUNT
+        self.cache_level = get_int_read_sp_level(inst_struct)
+
+    def __str__(self):
+        return f"IXOR_M R{self.idst}, L{self.cache_level}[mem]"
+
+    __repr__ = __str__
+
+
+class IROR_R_Inst(BaseInstByteCode):
+
+    def __init__(self, inst_struct):
+        super().__init__()
+        self.idst = inst_struct.dst % REGISTERS_COUNT
+        self.isrc = inst_struct.src % REGISTERS_COUNT
+
+    def __str__(self):
+        return f"IROR_R R{self.idst}, R{self.isrc}"
+
+    __repr__ = __str__
+
+
+class IROL_R_Inst(BaseInstByteCode):
+
+    def __init__(self, inst_struct):
+        super().__init__()
+        self.idst = inst_struct.dst % REGISTERS_COUNT
+        self.isrc = inst_struct.src % REGISTERS_COUNT
+
+    def __str__(self):
+        return f"IROL_R R{self.idst}, R{self.isrc}"
+
+    __repr__ = __str__
+
+
+class ISWAP_R_Inst(BaseInstByteCode):
+
+    def __init__(self, inst_struct):
+        super().__init__()
+        self.idst = inst_struct.dst % REGISTERS_COUNT
+        self.isrc = inst_struct.src % REGISTERS_COUNT
+
+    def __str__(self):
+        return f"ISWAP_R R{self.idst}, R{self.isrc}"
+
+    __repr__ = __str__
+
+
+class Template_Inst(BaseInstByteCode):
+
+    def __init__(self, inst_struct):
+        super().__init__()
+        self.idst = inst_struct.dst % REGISTERS_COUNT
+        self.isrc = inst_struct.src % REGISTERS_COUNT
+
+    def __str__(self):
+        return f"Template R{self.idst}, R{self.isrc}"
+
+    __repr__ = __str__
+
+
+class Template_Mem_Inst(BaseInstByteCode):
+
+    def __init__(self, inst_struct):
+        super().__init__()
+        self.idst = inst_struct.dst % REGISTERS_COUNT
+        self.isrc = inst_struct.src % REGISTERS_COUNT
+        self.cache_level = get_int_read_sp_level(inst_struct)
+
+    def __str__(self):
+        return f"Template_Mem R{self.idst}, L{self.cache_level}[mem]"
+
+    __repr__ = __str__
+
+
 class NOP_Inst(BaseInstByteCode):
 
     def __init__(self, inst_struct):
@@ -218,15 +463,3 @@ class NOP_Inst(BaseInstByteCode):
         return "NOP"
 
     __repr__ = __str__
-
-
-if __name__ == '__main__':
-    decoder = get_decoder_dict()
-    inst_bytes = []
-    for i in range(256):
-        rand_bytes = random.randint(0, 2**64).to_bytes(length=8, byteorder='little')
-        inst_bytes.append(rand_bytes)
-
-    program = Program(inst_bytes)
-    print(program)
-
