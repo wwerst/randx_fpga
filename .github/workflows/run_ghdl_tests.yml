@@ -1,0 +1,94 @@
+# This is a basic workflow that is manually triggered
+
+name: Manual workflow
+
+# Controls when the action will run. Workflow runs when manually triggered using the UI
+# or API.
+on:
+  push:
+    branches:
+      - '**'
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "greet"
+  run_tests:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-18.04
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    # Runs a single command using the runners shell
+    - name: Setup GHDL
+      run: |
+        pwd
+        cat /proc/cpuinfo
+        sudo apt update
+        sudo apt install -y gnat
+        cd ..
+        git clone https://github.com/ghdl/ghdl.git
+        cd ghdl
+        git checkout v0.37.0
+        ./configure --prefix=/usr/local
+        sudo make GNATMAKE="gnatmake -j4"
+        sudo make install
+        cd ..
+    - name: GHDL version
+      run: ghdl --version
+    - name: Prepare OSVVM
+      run: |
+        pwd
+        cd ..
+        git clone https://github.com/osvvm/osvvm.git
+        cd osvvm
+        git checkout 2020.12a
+        cd ..
+        sudo sed -i 's/^InstallationDirectories\[OSVVM\]=""/InstallationDirectories\[OSVVM\]="\/home\/runner\/work\/EE119b_AVR\/osvvm"/' /usr/local/lib/ghdl/vendors/config.sh
+    - name: Clone Code
+      uses: actions/checkout@v2
+    - name: Build OSVVM
+      run: |
+        pwd
+        ls -la
+        git log -1
+        /usr/local/lib/ghdl/vendors/compile-osvvm.sh --all
+    - name: Run Reg Tests
+      run: |
+        make reg_tests | tee reg_test_result.txt
+        cat reg_test_result.txt | grep -c -i -E "Alert|error|failed" | grep -q "^0$"
+    - name: Run Dau Tests
+      run: |
+        make dau_tests | tee dau_test_result.txt
+        cat dau_test_result.txt | grep -c -i -E "Alert|error|failed" | grep -q "^0$"
+    - name: Run Iau Tests
+      run: |
+        make iau_tests | tee iau_test_result.txt
+        cat iau_test_result.txt | grep -c -i -E "Alert|error|failed" | grep -q "^0$"
+    - name: Run ALU Tests
+      run: |
+        make alu_tests | tee alu_test_result.txt
+        cat alu_test_result.txt | grep -c -i -E "Alert|error|failed" | grep -q "^0$"
+    - name: Run CPU Full Program Tests
+      run: |
+        make cpu_fullprogram_tests | tee cpu_fullprogram_tests.txt
+        cat cpu_fullprogram_tests.txt | grep -c -i -E "Alert|error|failed" | grep -q "^0$"
+    # - name: Run CPU ALU Instruction Tests
+    #   run: |
+    #     make cpu_alu_tests | tee cpu_alu_tests.txt
+    #     cat cpu_alu_tests.txt | grep -c -i -E "Alert|error|failed" | grep -q "^0$"
+    # - name: Run CPU Data Move Instruction Tests
+    #   run: |
+    #     make cpu_data_move_tests | tee cpu_data_move_tests.txt
+    #     cat cpu_data_move_tests.txt | grep -c -i -E "Alert|error|failed" | grep -q "^0$"
+    # - name: Run CPU Flow Skip Instruction Tests
+    #   run: |
+    #     make cpu_flow_skip_tests | tee cpu_flow_skip_tests.txt
+    #     cat cpu_flow_skip_tests.txt | grep -c -i -E "Alert|error|failed" | grep -q "^0$"
+    # - name: Run CPU Flow Cond Branch Instruction Tests
+    #   run: |
+    #     make cpu_flow_cond_branch_tests | tee cpu_flow_cond_branch_tests.txt
+    #     cat cpu_flow_cond_branch_tests.txt | grep -c -i -E "Alert|error|failed" | grep -q "^0$"
+    # - name: Run CPU Flow Uncond Branch Instruction Tests
+    #   run: |
+    #     make cpu_flow_uncond_branch_tests | tee cpu_flow_uncond_branch_tests.txt
+    #     cat cpu_flow_uncond_branch_tests.txt | grep -c -i -E "Alert|error|failed" | grep -q "^0$"
