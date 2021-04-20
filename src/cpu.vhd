@@ -1,19 +1,8 @@
 ----------------------------------------------------------------------------
 --
---  Atmel AVR CPU
+-- CPU implementation
 --
---  This is the implementation of the complete AVR CPU.
 --
---  Revision History:
---     11 May 98  Glen George       Initial revision.
---      9 May 00  Glen George       Updated comments.
---      7 May 02  Glen George       Updated comments.
---     21 Jan 08  Glen George       Updated comments.
---     22 Feb 21  Eric Chen         Start sketching implementation
---     27 Mar 21  Will Werst        Implement full cpu. See git
---                                  history for more granular details
---                                  and revision history.
---     27 Mar 21  Will Werst        Pipeline cpu.
 ----------------------------------------------------------------------------
 
 library ieee;
@@ -21,29 +10,21 @@ use ieee.std_logic_1164.all;
 --use ieee.std_logic_arith.all;
 use ieee.numeric_std.all;
 
-use work.opcodes;
-use work.AVR;
-use work.IAU;
-use work.DAU;
-use work.ALUOp;
+use work.RandomX_Common;
 
-entity  AVR_CPU  is
+entity  RandomX_CPU  is
 
     port (
-        ProgDB  :  in     std_logic_vector(15 downto 0);   -- program memory data bus
-        Reset   :  in     std_logic;                       -- reset signal (active low)
-        INT0    :  in     std_logic;                       -- interrupt signal (active low)
-        INT1    :  in     std_logic;                       -- interrupt signal (active low)
-        clock   :  in     std_logic;                       -- system clock
-        ProgAB  :  out    std_logic_vector(15 downto 0);   -- program memory address bus
-        DataAB  :  out    std_logic_vector(15 downto 0);   -- data memory address bus
-        DataWr  :  out    std_logic;                       -- data memory write enable (active low)
-        DataRd  :  out    std_logic;                       -- data memory read enable (active low)
-        DataDB  :  inout  std_logic_vector(7 downto 0)     -- data memory data bus
+        Clk         :  in     std_logic;                       -- system clock
+        Reset       :  in     std_logic;                       -- reset signal (active low)
+        Prog        :  in     RandomX_Common.raw_prog_arr_t;   -- Raw program
+        SPadDB_Rd   :  in     std_logic_vector(63 downto 0);   -- scratchpad data bus
+        SPadAB      :  out    std_logic_vector(18 downto 0);   -- scratchpad address bus
+        SPadDB_Wr   :  out    std_logic_vector(63 downto 0)    -- scratchpad data bus
     );
 
-end  AVR_CPU;
+end  RandomX_CPU;
 
-architecture dataflow of AVR_CPU is
+architecture dataflow of RandomX_CPU is
 
 end architecture;

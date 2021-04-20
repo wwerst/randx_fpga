@@ -1,95 +1,72 @@
 ---------------------------------------------------------------------
-
--- Common stuff
-
--- This file provides convenience things required in multiple other files,
--- so we stop getting errors about things being defined twice.
-
--- Packages included are
---      AVR- general AVR constants
-
--- Entities included are:
---      AdderBit- single bit full adder
-
--- Revision History:
---      06 Feb 21   Eric Chen   Add word/address size constants
---                              copy adderbit in from alu
---      13 Feb 21   Eric Chen   Create status bit constants
-
+--
+-- Common data to the RandomX CPU
+--
 ---------------------------------------------------------------------
-
---
--- Package defining constants and types for the AVR.
--- This includes the word and address sizes,
--- and constants for accessing the status bits.
---
 
 library ieee;
 use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 
-package AVR is
+package RandomX_Common is
 
-    constant WORDSIZE  : natural := 8;
-    constant ADDRSIZE: natural := 16;
-    subtype word_t is std_logic_vector(WORDSIZE-1 downto 0);
-    subtype addr_t is std_logic_vector(ADDRSIZE-1 downto 0);
+    -- Enum of all of the opcodes
+    type RandX_Op_t is (
+        IADD_RS,
+        IADD_M,
+        ISUB_R,
+        ISUB_M,
+        IMUL_R,
+        IMUL_M,
+        IMULH_R,
+        IMULH_M,
+        ISMULH_R,
+        ISMULH_M,
+        IMUL_RCP,
+        INEG_R,
+        IXOR_R,
+        IXOR_M,
+        IROR_R,
+        IROL_R,
+        ISWAP_R,
+        FSWAP_R,
+        FADD_R
+        FADD_M,
+        FSUB_R,
+        FSUB_M,
+        FSCAL_R,
+        FMUL_R,
+        FDIV_M,
+        FSQRT_R,
+        CBRANCH,
+        CFROUND,
+        ISTORE,
+        NOP,
+    );
 
-    -- Single register data bus type
-    subtype reg_s_data_t is word_t;
-    -- Single register select bus type
-    subtype reg_s_sel_t is std_logic_vector(4 downto 0);
+    -- 8-Byte raw instruction from RandomX instruction encoding
+    type raw_inst_t is record
+        imm32   : std_logic_vector(31 downto 0);
+        mod_    : std_logic_vector(7 downto 0);
+        src     : std_logic_vector(7 downto 0);
+        dst     : std_logic_vector(7 downto 0);
+        opcode  : std_logic_vector(7 downto 0);
+    end record raw_inst_t;
 
-    -- Double register data bus type
-    subtype reg_d_data_t is std_logic_vector(2*WORDSIZE-1 downto 0);
+    -- Reduced, or compressed, representation of RandomX instruction. It
+    -- removes unused bits and
+    type reduce_inst_t is record
+        imm32       : signed(31 downto 0);
+        mod_mem     : unsigned(1 downto 0);
+        mod_shift   : unsigned(1 downto 0);
+        mod_cond    : unsigned(3 downto 0);
+        src         : unsigned(2 downto 0);
+        dst         : unsigned(2 downto 0);
+        opcode      : RandX_Op_t;
+    end record;
 
-    subtype reg_d_sel_t is std_logic_vector(1 downto 0);
+    type raw_prog_arr_t is array (0 to 255) of raw_inst_t;
 
-    constant STATUS_INT: integer := 7;
-    constant STATUS_TRANS: integer := 6;
-    constant STATUS_HCARRY: integer := 5;
-    constant STATUS_SIGN: integer := 4;
-    constant STATUS_OVER: integer := 3;
-    constant STATUS_NEG: integer := 2;
-    constant STATUS_ZERO: integer := 1;
-    constant STATUS_CARRY: integer := 0;
 
 end package;
 
---
---  AdderBit
---
---  This is a bit of the adder for doing addition in the ALU.
---
---  Inputs:
---    A  - first operand bit (bus A)
---    B  - second operand bit (bus B)
---    Ci - carry in (from previous bit)
---
---  Outputs:
---    S  - sum for this bit
---    Co - carry out for this bit
---
-
-library ieee;
-use ieee.std_logic_1164.all;
-
-entity  AdderBit  is
-
-    port(
-        A  : in   std_logic;        -- first operand
-        B  : in   std_logic;        -- second operand
-        Ci : in   std_logic;        -- carry in from previous bit
-        S  : out  std_logic;        -- sum (result)
-        Co : out  std_logic         -- carry out to next bit
-    );
-
-end  AdderBit;
-
-
-architecture  dataflow  of  AdderBit  is
-begin
-
-    S  <=  A  xor  B  xor  Ci;
-    Co <=  (A  and  B)  or  (A  and Ci)  or  (B  and  Ci);
-
-end  dataflow;
