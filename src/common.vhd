@@ -8,7 +8,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-package RandomX_Common is
+package Common is
 
     -- Enum of all of the opcodes
     type RandX_Op_t is (
