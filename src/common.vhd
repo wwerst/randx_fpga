@@ -67,6 +67,42 @@ package Common is
 
     type raw_prog_arr_t is array (0 to 255) of raw_inst_t;
 
+    type optag_t is record
+        valid       : std_logic;
+        ident       : integer range 0 to 31;
+    end record;
+
+    subtype intreg_t is std_logic_vector(63 downto 0);
+
+    -- Integer ALU Ops. These are derived from the full RandX_Op_t
+    -- ops, but contain the results after eliminating memory deps and stuff.
+    type IntOp_t is (
+        IADDShift_Op,
+        ISUB_Op,
+        IMULL_Op, -- Lower 64 bits of unsigned multiply
+        IMULH_Op, -- Upper 64 bits of unsigned multiply
+        ISMULH_Op,
+        IMUL_RCP,
+        INEG_R,
+        IXOR_R,
+        IXOR_M,
+        IROR_R,
+        IROL_R,
+        ISWAP_R,
+        FSWAP_R,
+        FADD_R
+        FADD_M,
+        FSUB_R,
+        FSUB_M,
+        FSCAL_R,
+        FMUL_R,
+        FDIV_M,
+        FSQRT_R,
+        CBRANCH,
+        CFROUND,
+        ISTORE,
+        NOP,
+    );
 
 end package;
 
