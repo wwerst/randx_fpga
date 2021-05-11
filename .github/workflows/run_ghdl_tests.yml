@@ -15,7 +15,7 @@ jobs:
   run_tests:
     # The type of runner that the job will run on
     runs-on: ubuntu-18.04
-    timeout-minutes: 1
+    timeout-minutes: 5
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -26,7 +26,10 @@ jobs:
         cat /proc/cpuinfo
         sudo apt update
         sudo apt install -y gnat
-        bash -c "$(wget -O - https://apt.llvm.org/llvm.sh 10)"
+        wget https://apt.llvm.org/llvm.sh
+        chmod +x llvm.sh
+        sudo ./llvm.sh 10
+        rm llvm.sh
         ln -s /usr/bin/clang-10 /usr/bin/clang
         ln -s /usr/bin/clang++-10 /usr/bin/clang++
         cd ..
