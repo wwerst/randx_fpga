@@ -12,6 +12,10 @@ bin/
 *.vcd
 *.ghw
 
+# Hex data
+
+*.hex
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
