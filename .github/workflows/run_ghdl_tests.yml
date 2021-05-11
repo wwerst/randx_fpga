@@ -48,7 +48,7 @@ jobs:
         cd osvvm
         git checkout 2020.12a
         cd ..
-        sudo sed -i 's/^InstallationDirectories\[OSVVM\]=""/InstallationDirectories\[OSVVM\]="\/home\/runner\/work\/EE119b_AVR\/osvvm"/' /usr/local/lib/ghdl/vendors/config.sh
+        sudo sed -i 's/^InstallationDirectories\[OSVVM\]=""/InstallationDirectories\[OSVVM\]="\/home\/runner\/work\/randx_fpga_private\/osvvm"/' /usr/local/lib/ghdl/vendors/config.sh
     - name: Clone Code
       uses: actions/checkout@v2
     - name: Build OSVVM
