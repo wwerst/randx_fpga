@@ -48,7 +48,6 @@ jobs:
         cd osvvm
         git checkout 2020.12a
         cd ..
-        sudo sed -i 's/^InstallationDirectories\[OSVVM\]=""/InstallationDirectories\[OSVVM\]="\/home\/runner\/work\/randx_fpga_private\/osvvm"/' /usr/local/lib/ghdl/vendors/config.sh
     - name: Clone Code
       uses: actions/checkout@v2
     - name: Build OSVVM
@@ -56,6 +55,7 @@ jobs:
         pwd
         ls -la
         git log -1
+        declare -A InstallationDirectory[OSVVM]="/home/runner/work/randx_fpga_private/osvvm"
         /usr/local/lib/ghdl/vendors/compile-osvvm.sh --all
     - name: Run CPU Full Program Tests
       run: |
