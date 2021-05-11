@@ -6,6 +6,7 @@
 
 osvvm/
 work/
+bin/
 
 # VHDL wave files
 *.vcd
