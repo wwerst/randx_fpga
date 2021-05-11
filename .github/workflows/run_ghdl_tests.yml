@@ -25,7 +25,7 @@ jobs:
         cat /proc/cpuinfo
         sudo apt update
         sudo apt install -y gnat
-        bash -c "$(wget -O - https://apt.llvm.org/llvm.sh 10.0)"
+        bash -c "$(wget -O - https://apt.llvm.org/llvm.sh 10)"
         ln -s /usr/bin/clang-10 /usr/bin/clang
         ln -s /usr/bin/clang++-10 /usr/bin/clang++
         cd ..
