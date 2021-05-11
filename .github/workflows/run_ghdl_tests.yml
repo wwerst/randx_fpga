@@ -30,8 +30,6 @@ jobs:
         chmod +x llvm.sh
         sudo ./llvm.sh 10
         rm llvm.sh
-        ln -s /usr/bin/clang-10 /usr/bin/clang
-        ln -s /usr/bin/clang++-10 /usr/bin/clang++
         cd ..
         git clone https://github.com/ghdl/ghdl.git
         cd ghdl
