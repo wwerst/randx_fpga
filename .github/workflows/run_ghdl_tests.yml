@@ -33,7 +33,7 @@ jobs:
         cd ..
         git clone https://github.com/ghdl/ghdl.git
         cd ghdl
-        git checkout v0.37.0
+        git checkout v1.0.0
         ./configure --with-llvm-config=/usr/bin/llvm-config-10 --prefix=/usr/local
         sudo make -j4
         sudo make install
