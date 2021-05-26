@@ -12,6 +12,10 @@ bin/
 *.vcd
 *.ghw
 
+# Doxygen output
+
+doxy_out/
+
 # Hex data
 
 *.hex

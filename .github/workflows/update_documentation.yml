@@ -1,0 +1,29 @@
+# This is a basic workflow that is manually triggered
+
+name: Update Documentation
+
+# Controls when the action will run. Workflow runs when manually triggered using the UI
+# or API.
+on:
+  push:
+    branches:
+      - '**'
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Doxygen Action
+        uses: mattnotmitt/doxygen-action@v1.3.1
+        with:
+          doxyfile-path: 'docs/Doxyfile'
+      - name: GitHub Pages
+        if: success()
+        uses: crazy-max/ghaction-github-pages@v2.4.1
+        with:
+          target_branch: gh-pages
+          build_dir: doxy_out/html
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
