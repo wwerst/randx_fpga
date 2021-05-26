@@ -1,6 +1,6 @@
 ----------------------------------------------------------------------------
 --! @file
---! @brief Integer unit
+--! @brief Floating Point unit
 --
 --
 ----------------------------------------------------------------------------
@@ -14,7 +14,7 @@ use work.Common;
 
 
 
-entity IntUnit is
+entity FloatUnit is
 
     port (
         Clk         :  in     std_logic;                       -- system clock
@@ -25,8 +25,8 @@ entity IntUnit is
         SPadDB_Wr   :  out    std_logic_vector(63 downto 0)    -- scratchpad data bus
     );
 
-end  IntUnit;
+end  FloatUnit;
 
-architecture dataflow of IntUnit is
+architecture dataflow of FloatUnit is
 
 end architecture;

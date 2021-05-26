@@ -14,10 +14,10 @@ library osvvm;
 use osvvm.CoveragePkg.all;
 use osvvm.AlertLogPkg.all;
 
-entity randomx_cpu_tb is
-end randomx_cpu_tb;
+entity cpu_tb is
+end cpu_tb;
 
-architecture testbench of randomx_cpu_tb is
+architecture testbench of cpu_tb is
 
     -- test bench clock and done
     constant CLK_PERIOD : time := 1 ms;

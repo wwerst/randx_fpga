@@ -1,7 +1,7 @@
 
 STACK_SIZE = $(shell ulimit -s)
 
-.PHONY: all import fullprogram_tests continuous_tests clean
+.PHONY: all import fullprogram_tests continuous_tests documentation clean
 
 all:
 	sleep 1
@@ -22,6 +22,9 @@ fullprogram_tests: import
 
 continuous_tests:
 	fswatch -m poll_monitor -0 -o src/* | xargs -0 -n1 bash -c "clear && echo '*****************Running Tests***************************' && make cpu_fullprogram_tests"
+
+documentation:
+	doxygen docs/Doxyfile
 
 clean:
 	rm -r work/*.cf || true

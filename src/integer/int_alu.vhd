@@ -1,9 +1,9 @@
 ----------------------------------------------------------------------------
+--! @file
+--! @brief Integer ALU
 --
--- Integer ALU
---
--- Performs integer ops on data inputs.
--- Tags are propagated along with 
+--! Performs integer ops on data inputs.
+--! Tags are propagated along with 
 --
 --
 ----------------------------------------------------------------------------

@@ -1,18 +1,16 @@
 ----------------------------------------------------------------------------
---
--- CPU implementation
---
+--! @file
+--! @brief Top-Level RandomX CPU implementation
 --
 ----------------------------------------------------------------------------
 
 library ieee;
 use ieee.std_logic_1164.all;
---use ieee.std_logic_arith.all;
 use ieee.numeric_std.all;
+use work.Common;
 
-use work.RandomX_Common;
 
-entity  RandomX_CPU  is
+entity  CPU  is
 
     port (
         Clk         :  in     std_logic;                       -- system clock
@@ -23,8 +21,15 @@ entity  RandomX_CPU  is
         SPadDB_Wr   :  out    std_logic_vector(63 downto 0)    -- scratchpad data bus
     );
 
-end  RandomX_CPU;
+end  CPU;
 
-architecture dataflow of RandomX_CPU is
+architecture dataflow of CPU is
+    component RegisterUnit is
+        port (
+            Clk   : in std_logic;
+            Reset : in std_logic
+        );
+    end component;
+begin
 
 end architecture;

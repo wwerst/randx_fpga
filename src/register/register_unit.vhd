@@ -15,7 +15,7 @@ entity RegisterUnit is
 
     port (
         Clk   : in std_logic;
-        Reset : in std_logic;
+        Reset : in std_logic
     );
 end RegisterUnit;
 
