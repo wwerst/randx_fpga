@@ -24,6 +24,7 @@ continuous_tests:
 	fswatch -m poll_monitor -0 -o src/* | xargs -0 -n1 bash -c "clear && echo '*****************Running Tests***************************' && make cpu_fullprogram_tests"
 
 documentation:
+	rm -rf doxy_out
 	doxygen docs/Doxyfile
 
 clean:
