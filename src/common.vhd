@@ -10,6 +10,15 @@ use ieee.numeric_std.all;
 
 package Common is
 
+    -- Constants
+    constant SIZE_WORD : natural := 64;
+
+    -- Number of registers by type. See 4.3 in RandomX_specs.pdf
+    constant REG_R_NUM : natural := 8;
+    constant REG_F_NUM : natural := 4;
+    constant REG_E_NUM : natural := 4;
+    constant REG_A_NUM : natural := 4;
+
     -- Enum of all of the opcodes
     type RandX_Op_t is (
         IADD_RS,
@@ -44,7 +53,27 @@ package Common is
         NOP,
     );
 
+    subtype IntReg_t is std_logic_vector(SIZE_WORD-1 downto 0);
+    type FloatReg_t is record
+        val_0 : std_logic_vector(SIZE_WORD-1 downto 0);
+        val_1 : std_logic_vector(SIZE_WORD-1 downto 0);
+    end record FloatReg_t;
+
+    subtype RegRArr_t is array (0 to REG_R_NUM) of std_logic_vector(SIZE_WORD-1 downto 0);
+    subtype RegFArr_t is array (0 to REG_F_NUM) of std_logic_vector(SIZE_WORD-1 downto 0);
+    subtype RegFArr_t is array (0 to REG_F_NUM) of std_logic_vector(SIZE_WORD-1 downto 0);
+    subtype RegFArr_t is array (0 to REG_F_NUM) of std_logic_vector(SIZE_WORD-1 downto 0);
+    type RegTable_t is record
+        r    : RegRArr_t;
+        f    : RegFArr_t;
+        e    : RegEArr_t;
+        a    : RegAArr_t;
+        fprc : std_logic_vector(1 downto 0);
+    end record RegTable_t;
+
+
     -- 8-Byte raw instruction from RandomX instruction encoding
+    -- TODO(WHW): Currently dead code
     type raw_inst_t is record
         imm32   : std_logic_vector(31 downto 0);
         mod_    : std_logic_vector(7 downto 0);
@@ -55,6 +84,7 @@ package Common is
 
     -- Reduced, or compressed, representation of RandomX instruction. It
     -- removes unused bits and
+    -- TODO(WHW): Currently dead code
     type reduce_inst_t is record
         imm32       : signed(31 downto 0);
         mod_mem     : unsigned(1 downto 0);
@@ -65,17 +95,21 @@ package Common is
         opcode      : RandX_Op_t;
     end record;
 
+    -- TODO(WHW): Currently dead code
     type raw_prog_arr_t is array (0 to 255) of raw_inst_t;
 
+    -- TODO(WHW): Currently dead code
     type optag_t is record
         valid       : std_logic;
         ident       : integer range 0 to 31;
     end record;
 
+    -- TODO(WHW): Currently dead code
     subtype intreg_t is std_logic_vector(63 downto 0);
 
     -- Integer ALU Ops. These are derived from the full RandX_Op_t
     -- ops, but contain the results after eliminating memory deps and stuff.
+    -- TODO(WHW): Currently dead code
     type IntOp_t is (
         IADDShift_Op,
         ISUB_Op,

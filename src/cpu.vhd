@@ -11,12 +11,12 @@ use work.Common;
 
 
 entity  CPU  is
-
+ 
     port (
         Clk         :  in     std_logic;                       -- system clock
         Reset       :  in     std_logic;                       -- reset signal (active low)
         Prog        :  in     RandomX_Common.raw_prog_arr_t;   -- Raw program
-        SPadDB_Rd   :  in     std_logic_vector(63 downto 0);   -- scratchpad data bus
+        SPadDB_Rd   :  in     std_logic_vector(63 downto 0);   -- scratchpad data  bus
         SPadAB      :  out    std_logic_vector(18 downto 0);   -- scratchpad address bus
         SPadDB_Wr   :  out    std_logic_vector(63 downto 0)    -- scratchpad data bus
     );
