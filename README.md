@@ -30,6 +30,16 @@ Use active high resets, and do things on rising_edge(clk).
 
 ## Setup
 
+### GHDL
+
+Follow the install instructions in `run_ghdl_tests.yml`. For Ubuntu 20.04 there are some changes:
+
+Error: No clang++. The install of llvm only adds clang++-10 and other numbered versions. Add symlink with `sudo ln -s /usr/bin/clang++-10 /usr/bin/clang++`, and similar for other llvm stuff.
+
+Error: No `zlib.h`. See https://github.com/ghdl/ghdl/issues/248. `sudo apt install zlib1g-dev`.
+
 ### Sublime
 
 Use the "Smart VHDL" package for good syntax highlighting and other IDE tools.
+
+Also recommend installing Terminus for terminals in Sublime, and sublimelinter-flake8 for python syntax checking
