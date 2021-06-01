@@ -36,7 +36,7 @@ architecture behavioral of LoopEngineTB is
             clk            : in std_logic;
             reset          : in std_logic;
             reg_table_in   : in Common.RegTable_t;
-            prog_in_inst   : in Common.reduced_inst_t;
+            prog_in_inst   : in Common.ReducedInst_t;
             prog_in_addr   : in integer range 0 to num_instructions-1;
             prog_in_enable : in std_logic; 
             start_prog     : in std_logic; 
@@ -70,7 +70,7 @@ architecture behavioral of LoopEngineTB is
     signal clk : std_logic := '0';
     signal reset : std_logic := '0';
     signal reg_table_in   : Common.RegTable_t;
-    signal prog_in_inst   : Common.reduced_inst_t;
+    signal prog_in_inst   : Common.ReducedInst_t;
     signal prog_in_addr   : integer range 0 to RdxCfg.RANDOMX_PROGRAM_SIZE-1;
     signal prog_in_enable : std_logic; 
     signal start_prog     : std_logic; 

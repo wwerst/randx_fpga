@@ -42,6 +42,33 @@ entity LoopEngine is
 end LoopEngine;
 
 architecture behavioral of LoopEngine is
+
+    component IntALU
+        port (
+            clk         :  in     std_logic;                       -- system clock
+            reset       :  in     std_logic;                       -- reset signal (active low)
+            inDst       :  in     Common.IntReg_t;                 -- Integer operand A
+            inSrc       :  in     Common.IntReg_t;                 -- Integer operand B
+            inInst      :  in     Common.ReducedInst_t;            -- Operation to apply
+            inTag       :  in     Common.OpTag_t;                  -- Operand tag (for Tomasulo)
+            outDst      :  out    Common.intreg_t;
+            outTag      :  out    Common.OpTag_t
+        );
+    end component;
+
+    component FloatALU
+        port (
+            clk         :  in     std_logic;                       -- system clock
+            reset       :  in     std_logic;                       -- reset signal (active low)
+            inDst       :  in     Common.FloatReg_t;                 -- Integer operand A
+            inSrc       :  in     Common.FloatReg_t;                 -- Integer operand B
+            inInst      :  in     Common.ReducedInst_t;            -- Operation to apply
+            inTag       :  in     Common.OpTag_t;                  -- Operand tag (for Tomasulo)
+            outDst      :  out    Common.FloatReg_t;
+            outTag      :  out    Common.OpTag_t
+        );
+    end component;
+
     type program_arr_t is array (0 to num_instructions) of Common.reduced_inst_t;
     signal program_s   : program_arr_t;
     signal reg_table_s : Common.RegTable_t;
