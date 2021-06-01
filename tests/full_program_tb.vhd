@@ -14,6 +14,8 @@ use ieee.numeric_std.all;
 use std.textio.all;
 use ieee.std_logic_textio.all;
 
+library osvvm;
+use osvvm.AlertLogPkg.all;
 
 entity full_program_tb is
     generic (

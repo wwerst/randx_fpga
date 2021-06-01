@@ -1,6 +1,8 @@
 
 STACK_SIZE = $(shell ulimit -s)
 
+GHDL_OPTIONS = -P/home/wwerst/proj/randx_fpga_private/osvvm --std=08 --workdir=work
+
 .PHONY: all import fullprogram_tests continuous_tests documentation clean
 
 all:
@@ -8,16 +10,12 @@ all:
 
 import: clean
 	mkdir -p work bin
-	ghdl -i --std=08 --workdir=work tests/*.vhd
-# 	ghdl -i --std=08 --workdir=work src/*.vhd
-
-# cpu_fullprogram_tests: import
-# 	ghdl -m --ieee=synopsys --std=08 --workdir=work cpu_programfull_tb 
-# 	ghdl -r --ieee=synopsys --std=08 --workdir=work cpu_programfull_tb  --ieee-asserts=disable --wave=fullprogram_tb.ghw --vcd=fullprogram_tb.vcd
+	ghdl -i ${GHDL_OPTIONS} tests/*.vhd
+# 	ghdl -i ${GHDL_OPTIONS} src/*.vhd
 
 fullprogram_tests: import
-	ghdl -m --std=08 --workdir=work -o bin/full_program_tb.so full_program_tb
-	ghdl -e -shared -Wl,-Wl,-u,ghdl_main --std=08 --workdir=work -o bin/full_program_tb full_program_tb
+	ghdl -m ${GHDL_OPTIONS} -o bin/full_program_tb.so full_program_tb
+	ghdl -e ${GHDL_OPTIONS} -shared -Wl,-Wl,-u,ghdl_main -o bin/full_program_tb full_program_tb
 	python3 tests/program.py
 
 continuous_tests:
