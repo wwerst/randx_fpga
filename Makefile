@@ -1,7 +1,7 @@
 
 STACK_SIZE = $(shell ulimit -s)
 
-GHDL_OPTIONS = -P/home/wwerst/proj/randx_fpga_private/osvvm --std=08 --workdir=work
+GHDL_OPTIONS = -Posvvm --std=08 --workdir=work
 
 .PHONY: all import fullprogram_tests continuous_tests documentation clean
 
