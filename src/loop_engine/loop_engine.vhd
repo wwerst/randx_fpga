@@ -65,6 +65,7 @@ begin
         end if;
     end process LoadProgProcess;
 
+    -- Run the program
     RunProgProcess: process(clk)
     begin
         if rising_edge(clk) then
