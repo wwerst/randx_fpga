@@ -18,7 +18,7 @@ Use Python conventions for capitalization, so:
 
 - Entities -> Classes: CamelCase
 - Ports -> variables: snake\_case
-- Signals -> private variables: \_snake\_case
+- Signals -> private variables: snake\_case_s
 - Signals in port mappings: Can prefix with the unit being port-mapped. e.g. UUT\_some\_signal
 - Types -> Structs: CamelCase_t
 
