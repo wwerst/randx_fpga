@@ -1,12 +1,9 @@
-----------------------------------------------------------------------------
---
--- Integer ALU
---
--- Performs integer ops on data inputs.
--- Tags are propagated along with 
---
---
-----------------------------------------------------------------------------
+----------------------------------------
+--! @file
+--! @brief Not used right now. Full program testbench
+--! @author Will Werst
+--! @date   May 2021
+----------------------------------------
 
 library ieee;
 use ieee.std_logic_1164.all;

@@ -28,14 +28,14 @@ entity LoopEngine is
         reset          : in std_logic; --! Active-high reset
         reg_table_in   : in Common.RegTable_t;  --! Initial register table
         prog_in_inst   : in Common.reduced_inst_t;
-        prog_in_addr   : in integer range 0 to num_instructions; --! Program address to load in
+        prog_in_addr   : in integer range 0 to num_instructions-1; --! Program address to load in
         prog_in_enable : in std_logic;        --! If prog_done is 1, then  
         start_prog     : in std_logic;          --! On rising edge, this triggers program execution.
-        spad_in        : in Common.QWord_t;     --! Scratchpad read input
-        spad_in_valid  : in std_logic;        --! Scratchpad read input valid
-        spad_addr      : out Common.QWord_t;  --! Scratchpad read/write address
+        spad_rd        : in Common.QWord_t;     --! Scratchpad read input
+        spad_rd_valid  : in std_logic;        --! Scratchpad read input valid
+        spad_addr      : out Common.SPadAddr_t;  --! Scratchpad read/write address
         spad_rd_en     : out std_logic;       --! If 1, then read data from scratchpad. Else, write data to scratchpad.
-        spad_out       : out Common.QWord_t;  --! Scratchpad write output
+        spad_wr       : out Common.QWord_t;  --! Scratchpad write output
         prog_done      : out std_logic;         --! 0 when a program is running, and 1 when program is done or not running.
         reg_table_out  : out Common.RegTable_t --! Final register table after program execution.
         );

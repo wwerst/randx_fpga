@@ -1,6 +1,6 @@
 ---------------------------------------------------------------------
---
--- Common data to the RandomX CPU
+--! @file
+--! @brief Common types, records, etc for the RandomX CPU
 --
 ---------------------------------------------------------------------
 
@@ -8,11 +8,13 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+use work.RdxCfg;
+
 package Common is
 
     -- Constants
     constant SIZE_QWORD : natural := 64;
-    constant SIZE_SPAD_ADDR : natural := 21 - 3; --! Scratchpad is 2097152 bytes, addressable by 8-byte.
+    constant SIZE_SPAD_ADDR : natural := RdxCfg.LOG2_RANDOMX_SCRATCHPAD_L3 - 3; --! Scratchpad is 2097152 bytes, addressable by 8-byte.
  
     -- Number of registers by type. See 4.3 in RandomX_specs.pdf
     constant REG_R_NUM : natural := 8;
@@ -40,7 +42,7 @@ package Common is
         IROL_R,
         ISWAP_R,
         FSWAP_R,
-        FADD_R
+        FADD_R,
         FADD_M,
         FSUB_R,
         FSUB_M,
@@ -51,7 +53,7 @@ package Common is
         CBRANCH,
         CFROUND,
         ISTORE,
-        NOP,
+        NOP
     );
 
     subtype SPadAddr_t is std_logic_vector(SIZE_SPAD_ADDR-1 downto 0); --! Scratchpad address bus
@@ -63,10 +65,10 @@ package Common is
         val_1 : std_logic_vector(SIZE_QWORD-1 downto 0);
     end record FloatReg_t;
 
-    subtype RegRArr_t is array (0 to REG_R_NUM) of std_logic_vector(SIZE_QWORD-1 downto 0);
-    subtype RegFArr_t is array (0 to REG_F_NUM) of std_logic_vector(SIZE_QWORD-1 downto 0);
-    subtype RegFArr_t is array (0 to REG_F_NUM) of std_logic_vector(SIZE_QWORD-1 downto 0);
-    subtype RegFArr_t is array (0 to REG_F_NUM) of std_logic_vector(SIZE_QWORD-1 downto 0);
+    type RegRArr_t is array (0 to REG_R_NUM) of std_logic_vector(SIZE_QWORD-1 downto 0);
+    type RegFArr_t is array (0 to REG_F_NUM) of std_logic_vector(SIZE_QWORD-1 downto 0);
+    type RegEArr_t is array (0 to REG_F_NUM) of std_logic_vector(SIZE_QWORD-1 downto 0);
+    type RegAArr_t is array (0 to REG_F_NUM) of std_logic_vector(SIZE_QWORD-1 downto 0);
     type RegTable_t is record
         r    : RegRArr_t;
         f    : RegFArr_t;
@@ -78,11 +80,11 @@ package Common is
 
     -- 8-Byte raw instruction from RandomX instruction encoding
     type raw_inst_t is record
-        imm32   : std_logic_vector(31 downto 0);
-        mod_    : std_logic_vector(7 downto 0);
-        src     : std_logic_vector(7 downto 0);
-        dst     : std_logic_vector(7 downto 0);
-        opcode  : std_logic_vector(7 downto 0);
+        imm32     : std_logic_vector(31 downto 0);
+        mod_field : std_logic_vector(7 downto 0);
+        src       : std_logic_vector(7 downto 0);
+        dst       : std_logic_vector(7 downto 0);
+        opcode    : std_logic_vector(7 downto 0);
     end record raw_inst_t;
 
     -- Reduced, or compressed, representation of RandomX instruction. It
@@ -103,9 +105,6 @@ package Common is
         ident       : integer range 0 to 31;
     end record;
 
-    -- TODO(WHW): Currently dead code
-    subtype intreg_t is std_logic_vector(63 downto 0);
-
     -- Integer ALU Ops. These are derived from the full RandX_Op_t
     -- ops, but contain the results after eliminating memory deps and stuff.
     -- TODO(WHW): Currently dead code
@@ -123,7 +122,7 @@ package Common is
         IROL_R,
         ISWAP_R,
         FSWAP_R,
-        FADD_R
+        FADD_R,
         FADD_M,
         FSUB_R,
         FSUB_M,
@@ -134,7 +133,7 @@ package Common is
         CBRANCH,
         CFROUND,
         ISTORE,
-        NOP,
+        NOP
     );
 
 end package;
