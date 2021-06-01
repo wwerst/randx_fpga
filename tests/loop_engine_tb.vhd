@@ -44,7 +44,7 @@ architecture behavioral of LoopEngineTB is
             spad_rd_valid  : in std_logic;
             spad_addr      : out Common.SPadAddr_t;
             spad_rd_en     : out std_logic;
-            spad_wr       : out Common.QWord_t;
+            spad_wr        : out Common.QWord_t;
             prog_done      : out std_logic; 
             reg_table_out  : out Common.RegTable_t
             );

@@ -65,10 +65,10 @@ package Common is
         val_1 : std_logic_vector(SIZE_QWORD-1 downto 0);
     end record FloatReg_t;
 
-    type RegRArr_t is array (0 to REG_R_NUM) of std_logic_vector(SIZE_QWORD-1 downto 0);
-    type RegFArr_t is array (0 to REG_F_NUM) of std_logic_vector(SIZE_QWORD-1 downto 0);
-    type RegEArr_t is array (0 to REG_F_NUM) of std_logic_vector(SIZE_QWORD-1 downto 0);
-    type RegAArr_t is array (0 to REG_F_NUM) of std_logic_vector(SIZE_QWORD-1 downto 0);
+    type RegRArr_t is array (0 to REG_R_NUM) of IntReg_t;
+    type RegFArr_t is array (0 to REG_F_NUM) of FloatReg_t;
+    type RegEArr_t is array (0 to REG_F_NUM) of FloatReg_t;
+    type RegAArr_t is array (0 to REG_F_NUM) of FloatReg_t;
     type RegTable_t is record
         r    : RegRArr_t;
         f    : RegFArr_t;
@@ -89,7 +89,7 @@ package Common is
 
     -- Reduced, or compressed, representation of RandomX instruction. It
     -- removes unused bits and
-    type reduced_inst_t is record
+    type ReducedInst_t is record
         imm32       : signed(31 downto 0);
         mod_mem     : unsigned(1 downto 0);
         mod_shift   : unsigned(1 downto 0);
@@ -100,7 +100,7 @@ package Common is
     end record;
 
     -- TODO(WHW): Currently dead code
-    type optag_t is record
+    type OpTag_t is record
         valid       : std_logic;
         ident       : integer range 0 to 31;
     end record;
