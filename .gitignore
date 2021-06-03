@@ -8,6 +8,10 @@ osvvm/
 work/
 bin/
 
+# GHDL Build files
+*.o
+floatalutb
+
 # VHDL wave files
 *.vcd
 *.ghw

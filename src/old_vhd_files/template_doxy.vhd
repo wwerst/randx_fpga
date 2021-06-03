@@ -25,4 +25,5 @@ entity TemplateEntity is
 end TemplateEntity;
 
 architecture behavioral of TemplateEntity is
+begin
 end architecture behavioral;

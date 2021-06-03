@@ -12,6 +12,9 @@ import: clean
 	mkdir -p work bin
 	ghdl -i ${GHDL_OPTIONS} tests/*.vhd
 	ghdl -i ${GHDL_OPTIONS} src/*.vhd
+	ghdl -i ${GHDL_OPTIONS} src/alu/*.vhd
+	ghdl -i ${GHDL_OPTIONS} src/loop_engine/*.vhd
+	ghdl -i ${GHDL_OPTIONS} src/hash_engine/*.vhd
 
 fullprogram_tests: import
 	ghdl -m ${GHDL_OPTIONS} -o bin/full_program_tb.so full_program_tb
@@ -22,6 +25,10 @@ loop_engine_tests: import
 	ghdl -m ${GHDL_OPTIONS} -o bin/loop_engine_tb.so LoopEngineTB
 	ghdl -e ${GHDL_OPTIONS} -shared -Wl,-Wl,-u,ghdl_main -o bin/loop_engine_tb LoopEngineTB
 	python3 tests/loop_engine_tb.py
+
+float_alu_tests: import
+	ghdl -m ${GHDL_OPTIONS} FloatALUTB
+	ghdl -r ${GHDL_OPTIONS} FloatALUTB --wave=float_alu_tests.ghw --vcd=float_alu_tests.vcd
 
 continuous_tests:
 	fswatch -m poll_monitor -0 -o src/* | xargs -0 -n1 bash -c "clear && echo '*****************Running Tests***************************' && make cpu_fullprogram_tests"

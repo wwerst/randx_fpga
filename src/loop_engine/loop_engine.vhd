@@ -11,6 +11,8 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 use work.Common;
+use work.FloatALU;
+use work.IntAlu;
 
 --! Executes the given 256 RandomX instructions when commanded.
 
@@ -21,13 +23,13 @@ use work.Common;
 entity LoopEngine is
 
     generic (
-        num_instructions : numeric := 256
+        num_instructions : natural := 256
     );
     port (
         clk            : in std_logic; --! Clock signal
         reset          : in std_logic; --! Active-high reset
         reg_table_in   : in Common.RegTable_t;  --! Initial register table
-        prog_in_inst   : in Common.reduced_inst_t;
+        prog_in_inst   : in Common.ReducedInst_t;
         prog_in_addr   : in integer range 0 to num_instructions-1; --! Program address to load in
         prog_in_enable : in std_logic;        --! If prog_done is 1, then  
         start_prog     : in std_logic;          --! On rising edge, this triggers program execution.
@@ -49,7 +51,7 @@ architecture behavioral of LoopEngine is
             reset       :  in     std_logic;                       -- reset signal (active low)
             inDst       :  in     Common.IntReg_t;                 -- Integer operand A
             inSrc       :  in     Common.IntReg_t;                 -- Integer operand B
-            inInst      :  in     Common.ReducedInst_t;            -- Operation to apply
+            inInst      :  in     Common.RandX_Op_t;            -- Operation to apply
             inTag       :  in     Common.OpTag_t;                  -- Operand tag (for Tomasulo)
             outDst      :  out    Common.intreg_t;
             outTag      :  out    Common.OpTag_t
@@ -62,7 +64,7 @@ architecture behavioral of LoopEngine is
             reset       :  in     std_logic;                       -- reset signal (active low)
             inDst       :  in     Common.FloatReg_t;                 -- Integer operand A
             inSrc       :  in     Common.FloatReg_t;                 -- Integer operand B
-            inInst      :  in     Common.ReducedInst_t;            -- Operation to apply
+            inInst      :  in     Common.RandX_Op_t;            -- Operation to apply
             inTag       :  in     Common.OpTag_t;                  -- Operand tag (for Tomasulo)
             outDst      :  out    Common.FloatReg_t;
             outTag      :  out    Common.OpTag_t
