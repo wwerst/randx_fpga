@@ -30,13 +30,13 @@ entity IntALU is
 end IntALU;
 
 architecture behavioral of IntALU is
-    computedResult : Common.intreg_t;
-    computedTag : Common.optag_t;
+    signal computedResult : Common.intreg_t;
+    signal computedTag : Common.optag_t;
 
-    unsignedDst : unsigned(63 downto 0);
-    unsignedSrc : unsigned(63 downto 0);
-    signedDst   : signed(63 downto 0);
-    signedSrc   : signed(63 downto 0); 
+    signal unsignedDst : unsigned(63 downto 0);
+    signal unsignedSrc : unsigned(63 downto 0);
+    signal signedDst   : signed(63 downto 0);
+    signal signedSrc   : signed(63 downto 0); 
 begin
 
     computedTag <= inTag;

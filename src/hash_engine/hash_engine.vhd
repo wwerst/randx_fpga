@@ -12,7 +12,7 @@ use ieee.numeric_std.all;
 use work.Common;
 
 
-entity TemplateEntity is
+entity HashEngine is
 
     generic (
         some_generic : numeric := 10
@@ -22,7 +22,8 @@ entity TemplateEntity is
         reset : in std_logic;
         some_out : out std_logic 
         );
-end TemplateEntity;
+end HashEngine;
 
-architecture behavioral of TemplateEntity is
+architecture behavioral of HashEngine is
+begin
 end architecture behavioral;

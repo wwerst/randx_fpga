@@ -12,6 +12,9 @@ import: clean
 	mkdir -p work bin
 	ghdl -i ${GHDL_OPTIONS} tests/*.vhd
 	ghdl -i ${GHDL_OPTIONS} src/*.vhd
+	ghdl -i ${GHDL_OPTIONS} src/alu/*.vhd
+	ghdl -i ${GHDL_OPTIONS} src/loop_engine/*.vhd
+	ghdl -i ${GHDL_OPTIONS} src/hash_engine/*.vhd
 
 fullprogram_tests: import
 	ghdl -m ${GHDL_OPTIONS} -o bin/full_program_tb.so full_program_tb
