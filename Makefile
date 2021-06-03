@@ -26,6 +26,10 @@ loop_engine_tests: import
 	ghdl -e ${GHDL_OPTIONS} -shared -Wl,-Wl,-u,ghdl_main -o bin/loop_engine_tb LoopEngineTB
 	python3 tests/loop_engine_tb.py
 
+float_alu_tests: import
+	ghdl -m ${GHDL_OPTIONS} FloatALUTB
+	ghdl -r ${GHDL_OPTIONS} FloatALUTB --wave=float_alu_tests.ghw --vcd=float_alu_tests.vcd
+
 continuous_tests:
 	fswatch -m poll_monitor -0 -o src/* | xargs -0 -n1 bash -c "clear && echo '*****************Running Tests***************************' && make cpu_fullprogram_tests"
 

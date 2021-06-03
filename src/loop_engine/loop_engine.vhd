@@ -51,7 +51,7 @@ architecture behavioral of LoopEngine is
             reset       :  in     std_logic;                       -- reset signal (active low)
             inDst       :  in     Common.IntReg_t;                 -- Integer operand A
             inSrc       :  in     Common.IntReg_t;                 -- Integer operand B
-            inInst      :  in     Common.ReducedInst_t;            -- Operation to apply
+            inInst      :  in     Common.RandX_Op_t;            -- Operation to apply
             inTag       :  in     Common.OpTag_t;                  -- Operand tag (for Tomasulo)
             outDst      :  out    Common.intreg_t;
             outTag      :  out    Common.OpTag_t
@@ -64,7 +64,7 @@ architecture behavioral of LoopEngine is
             reset       :  in     std_logic;                       -- reset signal (active low)
             inDst       :  in     Common.FloatReg_t;                 -- Integer operand A
             inSrc       :  in     Common.FloatReg_t;                 -- Integer operand B
-            inInst      :  in     Common.ReducedInst_t;            -- Operation to apply
+            inInst      :  in     Common.RandX_Op_t;            -- Operation to apply
             inTag       :  in     Common.OpTag_t;                  -- Operand tag (for Tomasulo)
             outDst      :  out    Common.FloatReg_t;
             outTag      :  out    Common.OpTag_t
