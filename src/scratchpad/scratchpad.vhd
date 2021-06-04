@@ -16,11 +16,11 @@ entity Scratchpad is
     port (
         clk     : in    std_logic;
         reset   : in    std_logic;
-        spad_rd : out   Common.QWord_t; --! Data read out from scratchpad
-        spad_rd_valid : out std_logic;  --! Data on spad_rd is correct for given address
+        spad_rd : out   Common.QWord_t;    --! Data read out from scratchpad
+        spad_rd_valid : out std_logic;     --! Data on spad_rd is correct for given address
         spad_addr : in  Common.SPadAddr_t; --! Address to read/write from
-        spad_rd_en : in std_logic;      --! If 1, then read data from scratchpad. Else, write data to scratchpad.
-        spad_wr : in    Common.QWord_t  --! Data to write to scratchpad
+        spad_rd_en : in std_logic;         --! If 1, then read data from scratchpad. Else, write data to scratchpad.
+        spad_wr : in    Common.QWord_t     --! Data to write to scratchpad
     );
 end Scratchpad;
 
