@@ -1,6 +1,8 @@
+---- Ignore this file
+
 ----------------------------------------
 --! @file
---! @brief Not used right now. Full program testbench
+--! @brief Not used right now. Full program testbench for the future
 --! @author Will Werst
 --! @date   May 2021
 ----------------------------------------
@@ -14,6 +16,9 @@ use ieee.std_logic_textio.all;
 library osvvm;
 use osvvm.AlertLogPkg.all;
 
+-- Full program testbench
+-- Called from program_tb.py
+-- Not current used.
 entity full_program_tb is
     generic (
         program_filename    : string;

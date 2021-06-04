@@ -2,6 +2,8 @@
 --! @file
 --! @brief Common types, records, etc for the RandomX CPU
 --
+--! @author Will Werst
+--! @date   May/June 2021
 ---------------------------------------------------------------------
 
 library ieee;

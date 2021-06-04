@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+
+#### Ignore this file. Not used.
+
+
 # based off of https://ghdl.github.io/ghdl-cosim/vhpidirect/dynamic.html
 
 import ctypes
