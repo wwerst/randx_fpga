@@ -1,6 +1,8 @@
 ----------------------------------------
 --! @file
---! @brief Testbench for the loop engine
+--! @brief Testbench for the float alu
+--! @brief This testbench is very simple, and is only used for probing issues
+--! @brief Full functionality testing is done with loop_engine_tb
 --! @author Will Werst
 --! @date   May 2021
 ----------------------------------------

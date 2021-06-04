@@ -1,6 +1,6 @@
 ----------------------------------------
 --! @file
---! @brief Template brief statement
+--! @brief Hash Engine testbench
 --! @author Will Werst
 --! @date   May 2021
 ----------------------------------------

@@ -3,6 +3,8 @@
 --! @brief Floating Point ALU
 --
 --! Performs floating point ops on data inputs.
+--! @author Will Werst
+--! @date   May/June 2021
 ----------------------------------------------------------------------------
 
 library ieee;

@@ -1,4 +1,14 @@
 #!/usr/bin/env python3
+
+# loop_engine_tb.py
+#
+# This code generates test data for the loop engine,
+# and then runs the loop engine.
+#
+#
+# Author: Will Werst
+# Date: May/June 2021
+
 # based off of https://ghdl.github.io/ghdl-cosim/vhpidirect/dynamic.html
 
 import ctypes

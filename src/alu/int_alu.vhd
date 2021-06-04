@@ -1,9 +1,10 @@
 ----------------------------------------------------------------------------
 --! @file
 --! @brief Integer ALU
+--! @brief Performs integer ops on data inputs.
 --
---! Performs integer ops on data inputs.
---
+--! @author Will Werst
+--! @date   May/June 2021
 ----------------------------------------------------------------------------
 
 library ieee;

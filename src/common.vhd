@@ -79,13 +79,13 @@ package Common is
 
 
     -- 8-Byte raw instruction from RandomX instruction encoding
-    type raw_inst_t is record
+    type RawInst_t is record
         imm32     : std_logic_vector(31 downto 0);
         mod_field : std_logic_vector(7 downto 0);
         src       : std_logic_vector(7 downto 0);
         dst       : std_logic_vector(7 downto 0);
         opcode    : std_logic_vector(7 downto 0);
-    end record raw_inst_t;
+    end record RawInst_t;
 
     -- Reduced, or compressed, representation of RandomX instruction. It
     -- removes unused bits and

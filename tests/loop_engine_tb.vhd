@@ -97,6 +97,46 @@ architecture behavioral of LoopEngineTB is
         return l.all;
     end to_hex;
 
+    function to_opcode(opcode_raw : std_logic_vector(7 downto 0)) return Common.RandX_Op_t is
+        variable opc_unsigned : unsigned(7 downto 0);
+    begin
+        opc_unsigned := unsigned(opcode_raw);
+        if opc_unsigned < 10 then
+            return Common.IADD_RS;
+        elsif opc_unsigned < 20 then
+            return Common.IADD_M;
+        end if;
+        return Common.NOP;
+    end to_opcode;
+
+    function raw_to_reduced_inst(raw_inst : Common.RawInst_t) return Common.ReducedInst_t is
+        variable imm32       : signed(31 downto 0);
+        variable mod_mem     : unsigned(1 downto 0);
+        variable mod_shift   : unsigned(1 downto 0);
+        variable mod_cond    : unsigned(3 downto 0);
+        variable src         : unsigned(2 downto 0);
+        variable dst         : unsigned(2 downto 0);
+        variable opcode      : Common.RandX_Op_t;
+        variable reduced_inst : Common.ReducedInst_t;
+    begin
+        imm32 := signed(raw_inst.imm32);
+        mod_mem := unsigned(raw_inst.mod_field(1 downto 0));
+        mod_shift := unsigned(raw_inst.mod_field(3 downto 2));
+        mod_cond := unsigned(raw_inst.mod_field(7 downto 4));
+        src := unsigned(raw_inst.src(2 downto 0));
+        dst := unsigned(raw_inst.dst(2 downto 0));
+        opcode := to_opcode(raw_inst.opcode);
+        reduced_inst := (
+            imm32,
+            mod_mem,
+            mod_shift,
+            mod_cond,
+            src,
+            dst,
+            opcode);
+        return reduced_inst;
+    end raw_to_reduced_inst;
+
 begin
 
     UUT: LoopEngine port map
@@ -144,7 +184,10 @@ begin
         variable linenum     : integer := 0;
         variable line_buf: line;
         variable long_std_vec: std_logic_vector(63 downto 0);
+        variable raw_inst : Common.RawInst_t;
+        variable cur_inst_slv : std_logic_vector(63 downto 0);
     begin
+        prog_in_enable <= '0';
         -- Load the program data
         linenum := 0;
         while not endfile(program_file) loop
@@ -163,7 +206,16 @@ begin
         end loop;
         wait for 100 ms;
         for linenum in ProgInstructions'range loop
-            report to_hex(ProgInstructions(linenum));
+            -- Load the instructions into loop_engine
+            -- This slicing is defined in RandomX_specs.pdf
+            cur_inst_slv := ProgInstructions(linenum);
+            raw_inst := (
+                cur_inst_slv(63 downto 32),  -- imm32
+                cur_inst_slv(31 downto 24),  -- mod_field
+                cur_inst_slv(23 downto 16),  -- src
+                cur_inst_slv(15 downto 8),   -- dst
+                cur_inst_slv(7 downto 0));    -- opcode)
+            prog_in_inst <= raw_to_reduced_inst(raw_inst);
         end loop;
         done <= TRUE;
         wait;
