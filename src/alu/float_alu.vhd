@@ -80,7 +80,7 @@ entity FloatALU is
         reset       :  in     std_logic;                       -- reset signal (active low)
         inDst       :  in     Common.FloatReg_t;                 -- Integer operand A
         inSrc       :  in     Common.FloatReg_t;                 -- Integer operand B
-        inInst      :  in     Common.RandX_Op_t;            -- Operation to apply
+        inInst      :  in     Common.ReducedInst_t;            -- Operation to apply
         inTag       :  in     Common.OpTag_t;                  -- Operand tag (for Tomasulo)
         outDst      :  out    Common.FloatReg_t;
         outTag      :  out    Common.OpTag_t
@@ -131,7 +131,7 @@ begin
     begin
         rnear_result_val_0 <= (others => 'X');
         rnear_result_val_1 <= (others => 'X');
-        case inInst is
+        case inInst.opcode is
             when Common.FSWAP_R  =>
                 -- (dst0, dst1) = (dst1, dst0)
                 rnear_result_val_0 <= rnear_dst_val_1;

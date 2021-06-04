@@ -53,60 +53,76 @@ begin
     -- Convert the input into unsigned and signed numbers
     unsignedDst <= unsigned(inDst);
     unsignedSrc <= unsigned(inSrc);
-    signedDst <= unsigned(inDst);
-    signedSrc <= unsigned(inSrc);
+    signedDst <= signed(inDst);
+    signedSrc <= signed(inSrc);
 
     CalculateProc: process(all)
-        variable tmp_unsigned : unsigned(Common.SIZE_QWORD-1 downto 0);
+        variable tmp_signed : signed(Common.SIZE_QWORD-1 downto 0);
+        variable res_signed : signed(Common.SIZE_QWORD-1 downto 0);
+        variable res_unsigned : unsigned(Common.SIZE_QWORD-1 downto 0);
+        variable tmp_slv128   : std_logic_vector(2*Common.SIZE_QWORD-1 downto 0);
+        variable rotate_int   : integer range 0 to 63;
     begin
         computedResult <= (others => 'X');
-        case inInst is
+        case inInst.opcode is
             when Common.IADD_RS  =>
                 -- dst = dst + (src << mod.shift) (+ imm32)
-                tmp_unsigned := (unsignedSrc sll inInst.mod_shift);
+                tmp_signed := (signedSrc sll to_integer(inInst.mod_shift));
                 if inInst.dst = 5 then
                     -- Additional special condition for this instruction
                     -- in the RandomX documentation.
-                    tmp_unsigned := tmp_unsigned + inInst.imm32;
+                    tmp_signed := tmp_signed + inInst.imm32;
                 end if;
-                computedResult <= unsignedDst + tmp_unsigned;
+                res_signed := signedDst + tmp_signed;
+                computedResult <= std_logic_vector(res_signed);
             when Common.IADD_M   =>  
                 -- dst = dst + [mem]
-                computedResult <= unsignedDst + unsignedSrc;
+                res_signed := signedDst + signedSrc;
+                computedResult <= std_logic_vector(res_signed);
             when Common.ISUB_R   =>  
                 -- dst = dst - src
-                computedResult <= unsignedDst - unsignedSrc;
+                res_signed := signedDst - signedSrc;
+                computedResult <= std_logic_vector(res_signed);
             when Common.ISUB_M   =>
                 -- dst = dst - [mem]
-                computedResult <= unsignedDst - unsignedSrc;
+                res_signed := signedDst - signedSrc;
+                computedResult <= std_logic_vector(res_signed);
             when Common.IMUL_R   =>
                 -- dst = dst * src
-                computedResult <= (unsignedDst * unsignedSrc)(Common.SIZE_QWORD-1 downto 0);
+                tmp_slv128 := std_logic_vector(unsignedDst * unsignedSrc);
+                computedResult <= tmp_slv128(Common.SIZE_QWORD-1 downto 0);
             when Common.IMUL_M   =>
                 -- dst = dst * [mem]
-                computedResult <= (unsignedDst * unsignedSrc)(Common.SIZE_QWORD-1 downto 0);
+                tmp_slv128 := std_logic_vector(unsignedDst * unsignedSrc);
+                computedResult <= tmp_slv128(Common.SIZE_QWORD-1 downto 0);
             when Common.IMULH_R  =>
                 -- dst = (dst * src) >> 64
-                computedResult <= (unsignedDst * unsignedSrc)(2*Common.SIZE_QWORD-1 downto Common.SIZE_QWORD);
+                tmp_slv128 := std_logic_vector(unsignedDst * unsignedSrc);
+                computedResult <= tmp_slv128(2*Common.SIZE_QWORD-1 downto Common.SIZE_QWORD);
             when Common.IMULH_M  =>
                 -- dst = (dst * [mem]) >> 64
-                computedResult <= (unsignedDst * unsignedSrc)(2*Common.SIZE_QWORD-1 downto Common.SIZE_QWORD);
+                tmp_slv128 := std_logic_vector(unsignedDst * unsignedSrc);
+                computedResult <= tmp_slv128(2*Common.SIZE_QWORD-1 downto Common.SIZE_QWORD);
             when Common.ISMULH_R =>
                 -- dst = (dst * src) >> 64 (signed)
-                computedResult <= (signedDst * signedSrc)(2*Common.SIZE_QWORD-1 downto Common.SIZE_QWORD);
+                tmp_slv128 := std_logic_vector(signedDst * signedSrc);
+                computedResult <= tmp_slv128(2*Common.SIZE_QWORD-1 downto Common.SIZE_QWORD);
             when Common.ISMULH_M =>
                 -- dst = (dst * [mem]) >> 64 (signed)
-                computedResult <= (signedDst * signedSrc)(2*Common.SIZE_QWORD-1 downto Common.SIZE_QWORD);
+                tmp_slv128 := std_logic_vector(signedDst * signedSrc);
+                computedResult <= tmp_slv128(2*Common.SIZE_QWORD-1 downto Common.SIZE_QWORD);
             when Common.IMUL_RCP =>
                 -- dst = rcp * dst
                 -- where rcp = 2^x / imm32
                 -- where x is largest integer such that rcp < 2^64
                 -- This is implemented internally by using src to contain rcp,
                 -- and rcp is calculated externally beforehand.
-                computedResult <= (unsignedDst * unsignedSrc)(Common.SIZE_QWORD-1 downto 0);
+                tmp_slv128 := std_logic_vector(unsignedDst * unsignedSrc);
+                computedResult <= tmp_slv128(Common.SIZE_QWORD-1 downto 0);
             when Common.INEG_R   =>
                 -- dst = -dst
-                computedResult <= -signedDst;
+                res_signed := -signedDst;
+                computedResult <= std_logic_vector(res_signed);
             when Common.IXOR_R   =>
                 -- dst = dst ^ src
                 computedResult <= inDst xor inSrc;
@@ -115,10 +131,12 @@ begin
                 computedResult <= inDst xor inSrc;
             when Common.IROR_R   =>
                 -- dst = dst >>> src
-                computedResult <= inDst ror inSrc;
+                rotate_int := to_integer(unsignedSrc(5 downto 0));
+                computedResult <= inDst ror rotate_int;
             when Common.IROL_R   =>
                 -- dst = dst <<< src
-                computedResult <= inDst rol inSrc;
+                rotate_int := to_integer(unsignedSrc(5 downto 0));
+                computedResult <= inDst rol rotate_int;
             when Common.ISWAP_R  =>
                 -- temp = src; src = dst; dst = temp
                 -- The int alu only has one output. This needs to
