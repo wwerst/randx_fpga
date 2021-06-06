@@ -113,20 +113,46 @@ int main(int argc, char **argv) {
         }
         scratchpad_index += 1;
     }
+
+    randomx::Program program;
+    randomx::ProgramConfiguration config;
+    randomx::NativeRegisterFile nreg;
+    randomx::InstructionByteCode bytecode[256];
+    randomx::TestVmDefault vm;
     
+    // Load initial register values
+    // This code is modified from the inner execution loop in vm_interpreted.cpp
+
+    uint32_t spAddr0 = 128; // Hardcoded for testing
+    uint32_t spAddr1 = 256; // Hardcoded for testing
+    
+    for (unsigned i = 0; i < randomx::RegistersCount; ++i)
+        nreg.r[i] ^= load64(scratchpad + spAddr0 + 8 * i);
+
+    for (unsigned i = 0; i < randomx::RegisterCountFlt; ++i)
+        nreg.f[i] = rx_cvt_packed_int_vec_f128(scratchpad + spAddr1 + 8 * i);
+
+    for (unsigned i = 0; i < randomx::RegisterCountFlt; ++i)
+    {
+        // HACK(WHW): There may be a bug here with the config
+        nreg.e[i] = vm.maskRegisterExponentMantissa(config, rx_cvt_packed_int_vec_f128(scratchpad + spAddr1 + 8 * (randomx::RegisterCountFlt + i)));
+    }
+
+    // TODO(WHW): Initialize the A registers better:
+
+    for(unsigned i = 0; i < randomx::RegisterCountFlt; ++i)
+    {
+        nreg.a[i][0] = 1.25; //rx_load_vec_f128();
+        nreg.a[i][1] = 1.75;
+    }
 
     // Run program
-    randomx::NativeRegisterFile nreg;
-    randomx::Program program;
     // HACK(WHW): Modified program.hpp to allow copying in of new program
     std::copy(std::begin(instructions), std::end(instructions), std::begin(program.programBuffer));
-    randomx::InstructionByteCode bytecode[256];
     std::cout << bytecode[255].imm << std::endl;
-    randomx::TestVmDefault vm; // = new randomx::TestVmDefault();
     vm.compileProgram(program, bytecode, nreg);
     std::cout << bytecode[255].imm << std::endl;
-    randomx::ProgramConfiguration program_config;
-    vm.executeBytecode(bytecode, scratchpad, program_config);
+    vm.executeBytecode(bytecode, scratchpad, config);
 
 
     // Output scratchpad_final_data.hex

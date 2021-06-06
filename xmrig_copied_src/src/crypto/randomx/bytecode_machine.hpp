@@ -231,7 +231,7 @@ namespace randomx {
 		static void exe_ISTORE(RANDOMX_EXE_ARGS) {
 			store64(scratchpad + ((*ibc.idst + ibc.imm) & ibc.memMask), *ibc.isrc);
 		}
-	protected:
+	public: // HACK(WHW): This was originally protected. Making public for hack testbench for vhdl
 		static rx_vec_f128 maskRegisterExponentMantissa(ProgramConfiguration& config, rx_vec_f128 x) {
 			const rx_vec_f128 xmantissaMask = rx_set_vec_f128(dynamicMantissaMask, dynamicMantissaMask);
 			const rx_vec_f128 xexponentMask = rx_load_vec_f128((const double*)&config.eMask);
