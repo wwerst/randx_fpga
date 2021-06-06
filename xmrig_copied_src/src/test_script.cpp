@@ -95,6 +95,15 @@ int main(int argc, char **argv) {
         prog_index += 1;
     }
 
+    uint8_t* scratchpad = new uint8_t[2097152];
+
+    for (int i = 0; i < 2097152; i++) {
+        if (scratchpad[i] != 0) {
+            std::cout << unsigned(scratchpad[i]) << std::endl;
+        }
+    }
+    
+
     randomx::NativeRegisterFile nreg;
     randomx::Program program;
     // HACK(WHW): Modified program.hpp to allow copying in of new program
@@ -105,7 +114,13 @@ int main(int argc, char **argv) {
     vm.compileProgram(program, bytecode, nreg);
     std::cout << bytecode[255].imm << std::endl;
     // randomx::compileProgram(program, bytecode, nreg);
+    randomx::ProgramConfiguration program_config;
+    vm.executeBytecode(bytecode, scratchpad, program_config);
 
-
+    for (int i = 0; i < 2097152; i++) {
+        if (scratchpad[i] != 0) {
+            std::cout << unsigned(scratchpad[i]) << std::endl;
+        }
+    }
     return 0;
 }
