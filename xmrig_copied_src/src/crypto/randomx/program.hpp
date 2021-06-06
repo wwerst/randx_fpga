@@ -51,9 +51,9 @@ namespace randomx {
 		uint32_t getSize() {
 			return RandomX_CurrentConfig.ProgramSize;
 		}
+		Instruction programBuffer[RANDOMX_PROGRAM_MAX_SIZE];
 	private:
 		uint64_t entropyBuffer[16];
-		Instruction programBuffer[RANDOMX_PROGRAM_MAX_SIZE];
 	};
 
 	static_assert(sizeof(Program) % 64 == 0, "Invalid size of class randomx::Program");

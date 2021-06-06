@@ -65,7 +65,7 @@ namespace randomx {
 
 
 int main(int argc, char **argv) {
-    std::ifstream infile("../../program_data.hex");
+    std::ifstream infile("program_data.hex");
     std::string line;
     randomx::Instruction instructions[256];
     // Load program
@@ -97,9 +97,13 @@ int main(int argc, char **argv) {
 
     randomx::NativeRegisterFile nreg;
     randomx::Program program;
+    // HACK(WHW): Modified program.hpp to allow copying in of new program
+    std::copy(std::begin(instructions), std::end(instructions), std::begin(program.programBuffer));
     randomx::InstructionByteCode bytecode[256];
+    std::cout << bytecode[255].imm << std::endl;
     randomx::TestVmDefault vm; // = new randomx::TestVmDefault();
     vm.compileProgram(program, bytecode, nreg);
+    std::cout << bytecode[255].imm << std::endl;
     // randomx::compileProgram(program, bytecode, nreg);
 
 

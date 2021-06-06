@@ -5,6 +5,8 @@ GHDL_OPTIONS = -Posvvm --std=08 --workdir=work
 
 .PHONY: all import fullprogram_tests continuous_tests documentation clean
 
+.PHONY: xmrig_test_bench_clean xmrig_test_bench_rebuild xmrig_test_bench_build
+
 all:
 	sleep 1
 
@@ -32,6 +34,15 @@ float_alu_tests: import
 
 continuous_tests:
 	fswatch -m poll_monitor -0 -o src/* | xargs -0 -n1 bash -c "clear && echo '*****************Running Tests***************************' && make cpu_fullprogram_tests"
+
+xmrig_test_bench_clean:
+	cd xmrig_copied_src && rm -rf build && mkdir build
+
+xmrig_test_bench_rebuild: xmrig_test_bench_clean
+	cd xmrig_copied_src/build && cmake .. && make -j24
+
+xmrig_test_bench_build:
+	cd xmrig_copied_src/build && cmake .. && make -j24
 
 documentation:
 	rm -rf doxy_out
