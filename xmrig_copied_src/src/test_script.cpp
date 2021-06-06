@@ -19,6 +19,7 @@ int main(int argc, char **argv) {
     std::ifstream infile("../../program_data.hex");
     std::string line;
     randomx::Instruction instructions[256];
+    // Load program
     int prog_index = 0;
     while (std::getline(infile, line))
     {
@@ -44,5 +45,12 @@ int main(int argc, char **argv) {
         // std::cout << unsigned(instructions[prog_index].mod) << std::endl;
         prog_index += 1;
     }
+
+    randomx::NativeRegisterFile nreg;
+    randomx::Program program;
+    randomx::InstructionByteCode bytecode[256];
+    randomx::compileProgram(program, bytecode, nreg);
+
+
     return 0;
 }
