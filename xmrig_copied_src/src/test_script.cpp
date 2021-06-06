@@ -103,8 +103,6 @@ int main(int argc, char **argv) {
     int scratchpad_index = 0;
     while (std::getline(scratchpad_init_file, line))
     {
-        // See 5.1 in RandomX_specs.pdf
-        // imm32, mod, src, dst, opcode   <= Struct order of instruction
         assert (line.size == 16);
         for (int byte_index = 0; byte_index < 8; byte_index++) {
             uint8_t byte_data = std::stoi(
@@ -117,6 +115,7 @@ int main(int argc, char **argv) {
     }
     
 
+    // Run program
     randomx::NativeRegisterFile nreg;
     randomx::Program program;
     // HACK(WHW): Modified program.hpp to allow copying in of new program
@@ -130,5 +129,18 @@ int main(int argc, char **argv) {
     randomx::ProgramConfiguration program_config;
     vm.executeBytecode(bytecode, scratchpad, program_config);
 
+
+    // Output scratchpad_final_data.hex
+    std::ofstream scratchpad_final_file("scratchpad_final_data.hex");
+    for (scratchpad_index = 0; scratchpad_index < 2097152 / 8; scratchpad_index++)
+    {
+        for (int byte_index = 0; byte_index < 8; byte_index++) {
+            uint8_t byte_data = scratchpad[scratchpad_index*8 + byte_index];
+            char dest[10];
+            sprintf(dest, "%02X", byte_data);
+            scratchpad_final_file << dest;
+        }
+        scratchpad_final_file << std::endl;
+    }
     return 0;
 }
