@@ -93,17 +93,17 @@ architecture behavioral of IntALUTB is
 begin
 
     -- Setup the integer ALU for testing
-    --UUT_IntALU: IntALU port map
-    --    (
-    --        clk         => clk,
-    --        reset       => reset,
-    --        inDst       => intALU_inDst,  
-    --        inSrc       => intALU_inSrc,  
-    --        inInst      => intALU_inInst,  
-    --        inTag       => intALU_inTag,  
-    --        outDst      => intALU_outDst,  
-    --        outTag      => intALU_outTag  
-    --);
+    UUT_IntALU: IntALU port map
+        (
+            clk         => clk,
+            reset       => reset,
+            inDst       => intALU_inDst,  
+            inSrc       => intALU_inSrc,  
+            inInst      => intALU_inInst,  
+            inTag       => intALU_inTag,  
+            outDst      => intALU_outDst,  
+            outTag      => intALU_outTag  
+    );
 
     CLOCK_PROC: process begin
         while not done loop
@@ -123,13 +123,12 @@ begin
         variable tv_IntOpDst : integer;
         variable tv_reducedinst_t : Common.ReducedInst_t;
     begin
-        report "hello";
         SetAlertLogName("IntAluTestbench");
-        report "hello";
-        TestCov.AddBins(TEST_BINS);
-        report "hello wait for clock";
-        --wait until rising_edge(clk);
-        report "hello clock rose";
+        
+        TestCov.AddBins(AtLeast => NUM_TESTS_PER_OP, CovBin => TEST_BINS);
+        
+        wait until rising_edge(clk);
+        
         while not TestCov.IsCovered loop
             tv_OpCode := TestCov.GetRandPoint;
             tv_reducedinst_t := (
@@ -142,10 +141,9 @@ begin
                 opcode      =>  Common.RandX_Op_t'VAL(tv_OpCode)
                 );
             intALU_inInst <= tv_reducedinst_t;
-            report "Set input";
             wait until rising_edge(clk);
 
-            TestCov.ICover((tv_OpCode, tv_IntOpSrc, tv_IntOpDst));
+            TestCov.ICover(tv_OpCode);
         end loop;
         TestCov.WriteBin;
 
@@ -155,6 +153,7 @@ begin
 
     MONITOR_PROC: process
     begin
+        wait;
     end process;
 
 end architecture;
