@@ -12,8 +12,57 @@
 #include <sstream>
 #include <stdexcept>
 
+#include "crypto/randomx/common.hpp"
 #include "crypto/randomx/instruction.hpp"
+#include "crypto/randomx/virtual_machine.hpp"
 #include "crypto/randomx/bytecode_machine.hpp"
+
+
+namespace randomx {
+
+    template<int softAes>
+    class TestVm : public VmBase<softAes>, public BytecodeMachine {
+    public:
+        using VmBase<softAes>::mem;
+        using VmBase<softAes>::scratchpad;
+        using VmBase<softAes>::program;
+        using VmBase<softAes>::config;
+        using VmBase<softAes>::reg;
+        using VmBase<softAes>::datasetPtr;
+        using VmBase<softAes>::datasetOffset;
+
+        void* operator new(size_t, void* ptr) { return ptr; }
+        void operator delete(void*) {}
+
+        void run(void* seed) override;
+        void setDataset(randomx_dataset* dataset) override;
+
+    protected:
+        virtual void datasetRead(uint64_t blockNumber, int_reg_t(&r)[RegistersCount]);
+        virtual void datasetPrefetch(uint64_t blockNumber);
+
+    private:
+        void execute();
+
+        InstructionByteCode bytecode[RANDOMX_PROGRAM_MAX_SIZE];
+    };
+
+    using TestVmDefault = TestVm<1>;
+    using TestVmHardAes = TestVm<0>;
+}
+
+namespace randomx {
+
+    template<int softAes>
+    void TestVm<softAes>::execute() {
+
+    }
+
+    using TestVmDefault = TestVm<1>;
+    using TestVmHardAes = TestVm<0>;
+}
+
+
 
 int main(int argc, char **argv) {
     std::ifstream infile("../../program_data.hex");
@@ -49,7 +98,8 @@ int main(int argc, char **argv) {
     randomx::NativeRegisterFile nreg;
     randomx::Program program;
     randomx::InstructionByteCode bytecode[256];
-    randomx::compileProgram(program, bytecode, nreg);
+    randomx::TestVmDefault vm; // = new randomx::TestVmDefault();
+    // randomx::compileProgram(program, bytecode, nreg);
 
 
     return 0;
