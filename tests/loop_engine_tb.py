@@ -15,6 +15,8 @@ import ctypes
 import _ctypes
 import mmap
 
+import random
+
 
 def uint_to_hexline(val):
     assert isinstance(val, ctypes.c_uint64)
@@ -55,7 +57,7 @@ def main():
     program_length = 256
     scratchpad_length = 2097152 // 8
     program_executor = GHDLProgramExecutor()
-    program_data = [ctypes.c_uint64(i) for i in range(program_length)]
+    program_data = [ctypes.c_uint64(random.randint(0, 2**64 - 1)) for i in range(program_length)]
     scratchpad_data = [ctypes.c_uint64(scratchpad_length-i-1) for i in range(scratchpad_length)]
     program_executor.call_ghdl(
         program_data,
