@@ -125,7 +125,6 @@ int main(int argc, char **argv) {
     randomx::TestVmDefault vm; // = new randomx::TestVmDefault();
     vm.compileProgram(program, bytecode, nreg);
     std::cout << bytecode[255].imm << std::endl;
-    // randomx::compileProgram(program, bytecode, nreg);
     randomx::ProgramConfiguration program_config;
     vm.executeBytecode(bytecode, scratchpad, program_config);
 
