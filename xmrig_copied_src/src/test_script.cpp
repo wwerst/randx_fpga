@@ -6,6 +6,7 @@
  * This is then used to dump an expected scratchpad file output for use in testing.
  */
 
+#include <assert.h>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -65,12 +66,12 @@ namespace randomx {
 
 
 int main(int argc, char **argv) {
-    std::ifstream infile("program_data.hex");
+    // Load program
+    std::ifstream program_file("program_data.hex");
     std::string line;
     randomx::Instruction instructions[256];
-    // Load program
     int prog_index = 0;
-    while (std::getline(infile, line))
+    while (std::getline(program_file, line))
     {
         // See 5.1 in RandomX_specs.pdf
         // imm32, mod, src, dst, opcode   <= Struct order of instruction
@@ -95,12 +96,24 @@ int main(int argc, char **argv) {
         prog_index += 1;
     }
 
-    uint8_t* scratchpad = new uint8_t[2097152];
 
-    for (int i = 0; i < 2097152; i++) {
-        if (scratchpad[i] != 0) {
-            std::cout << unsigned(scratchpad[i]) << std::endl;
+    // Load scratchpad
+    uint8_t* scratchpad = new uint8_t[2097152];
+    std::ifstream scratchpad_init_file("scratchpad_init_data.hex");
+    int scratchpad_index = 0;
+    while (std::getline(scratchpad_init_file, line))
+    {
+        // See 5.1 in RandomX_specs.pdf
+        // imm32, mod, src, dst, opcode   <= Struct order of instruction
+        assert (line.size == 16);
+        for (int byte_index = 0; byte_index < 8; byte_index++) {
+            uint8_t byte_data = std::stoi(
+                line.substr(byte_index*2, 2),
+                0,
+                16);
+            scratchpad[scratchpad_index*8 + byte_index] = byte_data;
         }
+        scratchpad_index += 1;
     }
     
 
@@ -117,10 +130,5 @@ int main(int argc, char **argv) {
     randomx::ProgramConfiguration program_config;
     vm.executeBytecode(bytecode, scratchpad, program_config);
 
-    for (int i = 0; i < 2097152; i++) {
-        if (scratchpad[i] != 0) {
-            std::cout << unsigned(scratchpad[i]) << std::endl;
-        }
-    }
     return 0;
 }
