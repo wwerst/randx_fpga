@@ -2,7 +2,7 @@
 
 ----------------------------------------
 --! @file
---! @brief Not used right now. Full program testbench for the future
+--! @brief Not used right now. Framework for ull program testbench for the future
 --! @author Will Werst
 --! @date   May 2021
 ----------------------------------------
