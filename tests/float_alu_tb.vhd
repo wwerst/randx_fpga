@@ -77,11 +77,11 @@ architecture behavioral of FloatALUTB is
 
     constant TEST_BINS: CovBinType := (
         -- Arithmetic
-        --GenBin(Common.RandX_Op_t'POS(  Common.FSWAP_R)) &
+        GenBin(Common.RandX_Op_t'POS(  Common.FSWAP_R)) &
         GenBin(Common.RandX_Op_t'POS(   Common.FADD_R)) &
-        GenBin(Common.RandX_Op_t'POS(   Common.FADD_M))
-        --GenBin(Common.RandX_Op_t'POS(   Common.FSUB_R)) &
-        --GenBin(Common.RandX_Op_t'POS(   Common.FSUB_M)) &
+        GenBin(Common.RandX_Op_t'POS(   Common.FADD_M)) &
+        GenBin(Common.RandX_Op_t'POS(   Common.FSUB_R)) &
+        GenBin(Common.RandX_Op_t'POS(   Common.FSUB_M))
         --GenBin(Common.RandX_Op_t'POS(  Common.FSCAL_R)) &
         --GenBin(Common.RandX_Op_t'POS(   Common.FMUL_R)) &
         --GenBin(Common.RandX_Op_t'POS(   Common.FDIV_M)) &
@@ -210,6 +210,18 @@ begin
                     expect_outdst1 := indst1 + insrc1;
                     AffirmIf(monitor_tb_id, abs(expect_outdst0 - outdst0) < 0.001, " FADD_M op incorrect");
                     AffirmIf(monitor_tb_id, abs(expect_outdst1 - outdst1) < 0.001, " FADD_M op incorrect");
+                when Common.FSUB_R =>
+                    -- (dst0, dst1) = (dst0 + src0, dst1 + src1)
+                    expect_outdst0 := indst0 - insrc0;
+                    expect_outdst1 := indst1 - insrc1;
+                    AffirmIf(monitor_tb_id, abs(expect_outdst0 - outdst0) < 0.001, " FSUB_R op incorrect");
+                    AffirmIf(monitor_tb_id, abs(expect_outdst1 - outdst1) < 0.001, " FSUB_R op incorrect");
+                when Common.FSUB_M =>
+                    -- (dst0, dst1) = (dst0 + [mem][0], dst1 + [mem][1])
+                    expect_outdst0 := indst0 - insrc0;
+                    expect_outdst1 := indst1 - insrc1;
+                    AffirmIf(monitor_tb_id, abs(expect_outdst0 - outdst0) < 0.001, " FSUB_M op incorrect");
+                    AffirmIf(monitor_tb_id, abs(expect_outdst1 - outdst1) < 0.001, " FSUB_M op incorrect");
                 when others =>
                     AffirmIf(monitor_tb_id, FALSE, " Unexpected opcode sent ");
             end case;
