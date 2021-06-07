@@ -14,7 +14,7 @@ jobs:
   run_tests:
     # The type of runner that the job will run on
     runs-on: ubuntu-18.04
-    timeout-minutes: 10
+    timeout-minutes: 30
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -59,6 +59,10 @@ jobs:
       run: |
         make loop_engine_tests | tee loop_engine_tests.txt
         cat loop_engine_tests.txt | grep -c -i -E "Alert|error|failed" | grep -q "^0$"
+    - name: Run Scratchpad Tests
+      run: |
+        make scratchpad_tests | tee scratchpad_tests.txt
+        cat scratchpad_tests.txt | grep -c -i -E "Alert|error|failed" | grep -q "^0$"
     - name: Run Int ALU Tests
       run: |
         make int_alu_tests | tee int_alu_tests.txt
