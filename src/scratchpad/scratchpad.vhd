@@ -1,8 +1,9 @@
 ----------------------------------------------------------------------------
+--! @file
+--! @brief Scratchpad implementation for the RandomX cpu
 --
--- Scratchpad implementation
---
---
+--! @author Will Werst
+--! @date   May/June 2021
 ----------------------------------------------------------------------------
 
 library ieee;
@@ -12,11 +13,15 @@ use ieee.numeric_std.all;
 use work.Common;
 use work.RdxCfg;
 
+
+--! Scratchpad
+--
+--! The scratchpad is a small memory space used by the RandomX loop_engine and hash_engine.
 entity Scratchpad is
 
     port (
-        clk     : in    std_logic;
-        reset   : in    std_logic;
+        clk     : in    std_logic;         --! Clock signal
+        reset   : in    std_logic;         --! Reset signal
         spad_rd : out   Common.QWord_t;    --! Data read out from scratchpad
         spad_rd_valid : out std_logic;     --! Data on spad_rd is correct for given address
         spad_addr : in  Common.SPadAddr_t; --! Address to read/write from

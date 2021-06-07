@@ -73,19 +73,20 @@ use work.float_pkg_rnear.all;
 use work.Common;
 
 
--- Float ALU
+--! Float ALU
 --
+--! This FloatALU implements the floating point ops needed for RandomX.
 entity FloatALU is
 
     port (
-        clk         :  in     std_logic;                       -- system clock
-        reset       :  in     std_logic;                       -- reset signal (active low)
-        inDst       :  in     Common.FloatReg_t;                 -- Integer operand A
-        inSrc       :  in     Common.FloatReg_t;                 -- Integer operand B
-        inInst      :  in     Common.ReducedInst_t;            -- Operation to apply
-        inTag       :  in     Common.OpTag_t;                  -- Operand tag (for Tomasulo)
-        outDst      :  out    Common.FloatReg_t;
-        outTag      :  out    Common.OpTag_t
+        clk         :  in     std_logic;            --! system clock
+        reset       :  in     std_logic;            --! reset signal (active low)
+        inDst       :  in     Common.FloatReg_t;    --! Input Destination Float Register
+        inSrc       :  in     Common.FloatReg_t;    --! Input Source Float Register
+        inInst      :  in     Common.ReducedInst_t; --! Operation to apply
+        inTag       :  in     Common.OpTag_t;       --! Operand tag (for Tomasulo). Valid and ident are passed through.
+        outDst      :  out    Common.FloatReg_t;    --! Output Destination Float Register
+        outTag      :  out    Common.OpTag_t        --! Output tag associated with outDst
     );
 end;
 

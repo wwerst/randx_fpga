@@ -1,6 +1,7 @@
 ----------------------------------------
 --! @file
---! @brief Template brief statement
+--! @brief This will contain the hash engine that uses loop engine.
+--! @brief The hash engine manages state between loops.
 --! @author Will Werst
 --! @date   May 2021
 ----------------------------------------
