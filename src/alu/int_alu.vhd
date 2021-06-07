@@ -15,17 +15,18 @@ use work.Common;
 
 -- Integer ALU
 --
+-- This implements the integer ops needed for RandomX.
 entity IntALU is
 
     port (
-        clk         :  in     std_logic;                       -- system clock
-        reset       :  in     std_logic;                       -- reset signal (active low)
-        inDst       :  in     Common.IntReg_t;                 -- Integer operand A
-        inSrc       :  in     Common.IntReg_t;                 -- Integer operand B
-        inInst      :  in     Common.ReducedInst_t;               -- Operation to apply
-        inTag       :  in     Common.OpTag_t;                  -- Operand tag (for Tomasulo)
-        outDst      :  out    Common.IntReg_t;
-        outTag      :  out    Common.OpTag_t
+        clk         :  in     std_logic;            --! system clock
+        reset       :  in     std_logic;            --! reset signal (active low)
+        inDst       :  in     Common.IntReg_t;      --! Integer Destination Operand
+        inSrc       :  in     Common.IntReg_t;      --! Integer Source Operand
+        inInst      :  in     Common.ReducedInst_t; --! Operation to apply
+        inTag       :  in     Common.OpTag_t;       --! Operand tag (for Tomasulo)
+        outDst      :  out    Common.IntReg_t;      --! Output Destination result
+        outTag      :  out    Common.OpTag_t        --! Tag associated with current output, for use with Tomasulo.
     );
 
 end IntALU;

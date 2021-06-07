@@ -9,6 +9,9 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+--! RdxCfg
+--
+--! This package contains various constants specified for the RandomX hash.
 package RdxCfg is
 
     -- Constants

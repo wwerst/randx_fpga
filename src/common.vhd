@@ -67,6 +67,7 @@ package Common is
         val_1 : std_logic_vector(SIZE_QWORD-1 downto 0);
     end record FloatReg_t;
 
+    -- Register table
     type RegRArr_t is array (0 to REG_R_NUM) of IntReg_t;
     type RegFArr_t is array (0 to REG_F_NUM) of FloatReg_t;
     type RegEArr_t is array (0 to REG_F_NUM) of FloatReg_t;
