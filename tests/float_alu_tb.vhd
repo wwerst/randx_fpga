@@ -81,11 +81,11 @@ architecture behavioral of FloatALUTB is
         GenBin(Common.RandX_Op_t'POS(   Common.FADD_R)) &
         GenBin(Common.RandX_Op_t'POS(   Common.FADD_M)) &
         GenBin(Common.RandX_Op_t'POS(   Common.FSUB_R)) &
-        GenBin(Common.RandX_Op_t'POS(   Common.FSUB_M))
-        --GenBin(Common.RandX_Op_t'POS(  Common.FSCAL_R)) &
-        --GenBin(Common.RandX_Op_t'POS(   Common.FMUL_R)) &
-        --GenBin(Common.RandX_Op_t'POS(   Common.FDIV_M)) &
-        --GenBin(Common.RandX_Op_t'POS(  Common.FSQRT_R))
+        GenBin(Common.RandX_Op_t'POS(   Common.FSUB_M)) &
+        --GenBin(Common.RandX_Op_t'POS(  Common.FSCAL_R))   -- Having issues getting this one working
+        GenBin(Common.RandX_Op_t'POS(   Common.FMUL_R)) &
+        GenBin(Common.RandX_Op_t'POS(   Common.FDIV_M)) &
+        GenBin(Common.RandX_Op_t'POS(  Common.FSQRT_R))
     );
 
     shared variable TestCov : CovPType;
@@ -172,10 +172,12 @@ begin
         variable insrc1  : real;
         variable indst0  : real;
         variable indst1  : real;
+        variable indst_fltreg  : Common.FloatReg_t;
         variable outdst0 : real;
         variable outdst1 : real;
         variable expect_outdst0 : real;
         variable expect_outdst1 : real;
+        variable scaler_x  : real;
         variable inInst  : Common.ReducedInst_t;
     begin
         monitor_tb_id := GetAlertLogID("floatAluTestbench", ALERTLOG_BASE_ID);
@@ -186,6 +188,7 @@ begin
             insrc1 := floatALU_inSrc1_real;
             indst0 := floatALU_inDst0_real;
             indst1 := floatALU_inDst1_real;
+            indst_fltreg := floatALU_inDst;
             inInst := floatALU_inInst;
             wait until floatALU_outTag.valid = '1';
             wait for 0 ns; -- Wait delta cycle for floatALU_outDst*_real to propagate.
@@ -222,6 +225,34 @@ begin
                     expect_outdst1 := indst1 - insrc1;
                     AffirmIf(monitor_tb_id, abs(expect_outdst0 - outdst0) < 0.001, " FSUB_M op incorrect");
                     AffirmIf(monitor_tb_id, abs(expect_outdst1 - outdst1) < 0.001, " FSUB_M op incorrect");
+                when Common.FSCAL_R =>
+                    -- (dst0, dst1) = (dst0 + [mem][0], dst1 + [mem][1])
+                    scaler_x := real(to_integer(unsigned(indst_fltreg.val_0(55 downto 52))));
+                    scaler_x := -15.0 + scaler_x * 2.0;
+                    expect_outdst0 := - indst0 * (2.0 ** scaler_x);
+                    scaler_x := real(to_integer(unsigned(indst_fltreg.val_1(55 downto 52))));
+                    scaler_x := -15.0 + scaler_x * 2.0;
+                    expect_outdst1 := - indst1 * (2.0 ** scaler_x);
+                    AffirmIf(monitor_tb_id, abs(expect_outdst0 - outdst0) < 0.001, " FSCAL_R op incorrect");
+                    AffirmIf(monitor_tb_id, abs(expect_outdst1 - outdst1) < 0.001, " FSCAL_R op incorrect");
+                when Common.FMUL_R =>
+                    -- (dst0, dst1) = (dst0 + src0, dst1 + src1)
+                    expect_outdst0 := indst0 * insrc0;
+                    expect_outdst1 := indst1 * insrc1;
+                    AffirmIf(monitor_tb_id, abs(expect_outdst0 - outdst0) < 0.001, " FMUL_R op incorrect");
+                    AffirmIf(monitor_tb_id, abs(expect_outdst1 - outdst1) < 0.001, " FMUL_R op incorrect");
+                when Common.FDIV_M =>
+                    -- (dst0, dst1) = (dst0 + src0, dst1 + src1)
+                    expect_outdst0 := indst0 / insrc0;
+                    expect_outdst1 := indst1 / insrc1;
+                    AffirmIf(monitor_tb_id, abs(expect_outdst0 - outdst0) < 0.001, " FDIV_M op incorrect");
+                    AffirmIf(monitor_tb_id, abs(expect_outdst1 - outdst1) < 0.001, " FDIV_M op incorrect");
+                when Common.FSQRT_R =>
+                    -- (dst0, dst1) = (dst0 + src0, dst1 + src1)
+                    expect_outdst0 := indst0 ** 0.5;
+                    expect_outdst1 := indst1 ** 0.5;
+                    AffirmIf(monitor_tb_id, abs(expect_outdst0 - outdst0) < 0.001, " FSQRT_R op incorrect");
+                    AffirmIf(monitor_tb_id, abs(expect_outdst1 - outdst1) < 0.001, " FSQRT_R op incorrect");
                 when others =>
                     AffirmIf(monitor_tb_id, FALSE, " Unexpected opcode sent ");
             end case;
