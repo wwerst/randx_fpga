@@ -1,8 +1,9 @@
 ----------------------------------------
 --! @file
 --! @brief Testbench for the loop engine
+--! @brief This is still in progress. Loop Engine is somewhat of a monolith.
 --! @author Will Werst
---! @date   May 2021
+--! @date   May/June 2021
 ----------------------------------------
 
 
