@@ -164,6 +164,13 @@ begin
         variable unsigned_indst  : unsigned(63 downto 0);
         variable unsigned_outdst : unsigned(63 downto 0);
         variable expect_unsigned : unsigned(63 downto 0);
+        variable expect_unsigned_128 : unsigned(127 downto 0);
+        variable signed_insrc  : signed(63 downto 0);
+        variable signed_indst  : signed(63 downto 0);
+        variable signed_outdst : signed(63 downto 0);
+        variable expect_signed : signed(63 downto 0);
+        variable expect_signed_128 : signed(127 downto 0);
+        variable rotate_int    : integer;
     begin
         monitor_tb_id := GetAlertLogID("IntAluTestbench", ALERTLOG_BASE_ID);
         while not done loop
@@ -171,15 +178,83 @@ begin
             wait until intALU_inTag.valid = '1';
             unsigned_insrc := unsigned(intALU_inSrc);
             unsigned_indst := unsigned(intALU_inDst);
+            signed_insrc := signed(intALU_inSrc);
+            signed_indst := signed(intALU_inDst);
             wait until intALU_outTag.valid = '1';
             unsigned_outdst := unsigned(intALU_outDst);
+            signed_outdst := signed(intALU_outDst);
             case intALU_inInst.opcode is
+                when Common.IADD_RS =>
+                    rotate_int := to_integer(intALU_inInst.mod_shift);
+                    expect_signed := (signed_indst + signed_insrc sll rotate_int);
+                    if intALU_inInst.dst = 5 then
+                        -- Special behavior for r5 that is specified in RandomX_Specs.pdf
+                        expect_signed := expect_signed + intALU_inInst.imm32;
+                    end if;
+                    AffirmIf(monitor_tb_id, signed_outdst = expect_signed, " IADD_M op incorrect");
                 when Common.IADD_M =>
-                    expect_unsigned := (unsigned_insrc + unsigned_indst);
-                    AffirmIf(monitor_tb_id, unsigned_outdst = expect_unsigned, " Add op incorrect");
+                    expect_unsigned := (unsigned_indst + unsigned_insrc);
+                    AffirmIf(monitor_tb_id, unsigned_outdst = expect_unsigned, " IADD_M op incorrect");
+                when Common.ISUB_R =>
+                    expect_unsigned := (unsigned_indst - unsigned_insrc);
+                    AffirmIf(monitor_tb_id, unsigned_outdst = expect_unsigned, " ISUB_R op incorrect");
+                when Common.ISUB_M =>
+                    expect_unsigned := (unsigned_indst - unsigned_insrc);
+                    AffirmIf(monitor_tb_id, unsigned_outdst = expect_unsigned, " ISUB_M op incorrect");
+                when Common.IMUL_R =>
+                    expect_unsigned_128 := (unsigned_indst * unsigned_insrc);
+                    expect_unsigned := expect_unsigned_128(63 downto 0);
+                    AffirmIf(monitor_tb_id, unsigned_outdst = expect_unsigned, " IMUL_R op incorrect");
+                when Common.IMUL_M =>
+                    expect_unsigned_128 := (unsigned_indst * unsigned_insrc);
+                    expect_unsigned := expect_unsigned_128(63 downto 0);
+                    AffirmIf(monitor_tb_id, unsigned_outdst = expect_unsigned, " IMUL_M op incorrect");
+                when Common.IMULH_R =>
+                    expect_unsigned_128 := (unsigned_indst * unsigned_insrc);
+                    expect_unsigned := expect_unsigned_128(127 downto 64);
+                    AffirmIf(monitor_tb_id, unsigned_outdst = expect_unsigned, " IMULH_R op incorrect");
+                when Common.IMULH_M =>
+                    expect_unsigned_128 := (unsigned_indst * unsigned_insrc);
+                    expect_unsigned := expect_unsigned_128(127 downto 64);
+                    AffirmIf(monitor_tb_id, unsigned_outdst = expect_unsigned, " IMULH_M op incorrect");
+                when Common.ISMULH_R =>
+                    expect_signed_128 := (signed_indst * signed_insrc);
+                    expect_signed := expect_signed_128(127 downto 64);
+                    AffirmIf(monitor_tb_id, signed_outdst = expect_signed, " ISMULH_R op incorrect");
+                when Common.ISMULH_M =>
+                    expect_signed_128 := (signed_indst * signed_insrc);
+                    expect_signed := expect_signed_128(127 downto 64);
+                    AffirmIf(monitor_tb_id, signed_outdst = expect_signed, " ISMULH_M op incorrect");
+                when Common.IMUL_RCP =>
+                    -- This operation does a reciprocal op, but the reciprocal is pre-computed and passed in via src
+                    -- In the loop_engine. Thus, this is just unsigneddst * unsignedsrc
+                    expect_unsigned_128 := (unsigned_indst * unsigned_insrc);
+                    expect_unsigned := expect_unsigned_128(63 downto 0);
+                    AffirmIf(monitor_tb_id, unsigned_outdst = expect_unsigned, " IMUL_RCP op incorrect");
+                when Common.INEG_R =>
+                    expect_signed := -signed_indst;
+                    AffirmIf(monitor_tb_id, signed_outdst = expect_signed, " INEG_R op incorrect");
+                when Common.IXOR_R =>
+                    expect_unsigned := unsigned_indst xor unsigned_insrc;
+                    AffirmIf(monitor_tb_id, unsigned_outdst = expect_unsigned, " IXOR_R op incorrect");
+                when Common.IXOR_M =>
+                    expect_unsigned := unsigned_indst xor unsigned_insrc;
+                    AffirmIf(monitor_tb_id, unsigned_outdst = expect_unsigned, " IXOR_M op incorrect");
+                when Common.IROR_R =>
+                    rotate_int := to_integer(unsigned_insrc(10 downto 0));
+                    expect_unsigned := unsigned(std_logic_vector(unsigned_indst) ror rotate_int);
+                    AffirmIf(monitor_tb_id, unsigned_outdst = expect_unsigned, " IROR_R op incorrect");
+                when Common.IROL_R =>
+                    rotate_int := to_integer(unsigned_insrc(10 downto 0));
+                    expect_unsigned := unsigned(std_logic_vector(unsigned_indst) rol rotate_int);
+                    AffirmIf(monitor_tb_id, unsigned_outdst = expect_unsigned, " IROL_R op incorrect");
+                when Common.ISWAP_R =>
+                    -- The rest of the swap is done in the loop_engine.
+                    -- Expected behavior here is for outdst = insrc
+                    expect_unsigned := unsigned_insrc;
+                    AffirmIf(monitor_tb_id, unsigned_outdst = expect_unsigned, " ISWAP_R op incorrect");
                 when others =>
-                    null;
-                    --AffirmIf(monitor_tb_id, FALSE, " Unexpected opcode sent ");
+                    AffirmIf(monitor_tb_id, FALSE, " Unexpected opcode sent ");
             end case;
         end loop;
         wait;
