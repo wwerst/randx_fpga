@@ -4,7 +4,7 @@
 --! @brief 4.6.2 in RandomX_specs.pdf
 --
 --! @author Will Werst
---! @date   May 2021
+--! @date   May/June 2021
 ----------------------------------------
 
 
