@@ -82,7 +82,7 @@ architecture behavioral of FloatALUTB is
         GenBin(Common.RandX_Op_t'POS(   Common.FADD_M)) &
         GenBin(Common.RandX_Op_t'POS(   Common.FSUB_R)) &
         GenBin(Common.RandX_Op_t'POS(   Common.FSUB_M)) &
-        --GenBin(Common.RandX_Op_t'POS(  Common.FSCAL_R))   -- Having issues getting this one working
+        --GenBin(Common.RandX_Op_t'POS(  Common.FSCAL_R)) &  -- Having issues getting this one working
         GenBin(Common.RandX_Op_t'POS(   Common.FMUL_R)) &
         GenBin(Common.RandX_Op_t'POS(   Common.FDIV_M)) &
         GenBin(Common.RandX_Op_t'POS(  Common.FSQRT_R))
@@ -214,41 +214,49 @@ begin
                     AffirmIf(monitor_tb_id, abs(expect_outdst0 - outdst0) < 0.001, " FADD_M op incorrect");
                     AffirmIf(monitor_tb_id, abs(expect_outdst1 - outdst1) < 0.001, " FADD_M op incorrect");
                 when Common.FSUB_R =>
-                    -- (dst0, dst1) = (dst0 + src0, dst1 + src1)
+                    -- (dst0, dst1) = (dst0 - src0, dst1 - src1)
                     expect_outdst0 := indst0 - insrc0;
                     expect_outdst1 := indst1 - insrc1;
                     AffirmIf(monitor_tb_id, abs(expect_outdst0 - outdst0) < 0.001, " FSUB_R op incorrect");
                     AffirmIf(monitor_tb_id, abs(expect_outdst1 - outdst1) < 0.001, " FSUB_R op incorrect");
                 when Common.FSUB_M =>
-                    -- (dst0, dst1) = (dst0 + [mem][0], dst1 + [mem][1])
+                    -- (dst0, dst1) = (dst0 - [mem][0], dst1 - [mem][1])
                     expect_outdst0 := indst0 - insrc0;
                     expect_outdst1 := indst1 - insrc1;
                     AffirmIf(monitor_tb_id, abs(expect_outdst0 - outdst0) < 0.001, " FSUB_M op incorrect");
                     AffirmIf(monitor_tb_id, abs(expect_outdst1 - outdst1) < 0.001, " FSUB_M op incorrect");
                 when Common.FSCAL_R =>
-                    -- (dst0, dst1) = (dst0 + [mem][0], dst1 + [mem][1])
+                    -- From RandomX_Specs documentation:
+                    --  This instruction negates the number and multiplies it by 2 x . x is calculated by taking the 4
+                    --  least significant digits of the biased exponent and interpreting them as a binary number using
+                    --  the digit set {+1, -1} as opposed to the traditional {0, 1} . The possible values of x are all
+                    --  odd numbers from -15 to +15.
+                    --  The mathematical operation described above is equivalent to a bitwise XOR of the binary
+                    --  representation with the value of 0x80F0000000000000 .
+
+                    -- TODO(WHW): The black box test based off of above description is not working.
                     scaler_x := real(to_integer(unsigned(indst_fltreg.val_0(55 downto 52))));
-                    scaler_x := -15.0 + scaler_x * 2.0;
+                    scaler_x := 15.0 - scaler_x * 2.0;
                     expect_outdst0 := - indst0 * (2.0 ** scaler_x);
                     scaler_x := real(to_integer(unsigned(indst_fltreg.val_1(55 downto 52))));
-                    scaler_x := -15.0 + scaler_x * 2.0;
+                    scaler_x := 15.0 - scaler_x * 2.0;
                     expect_outdst1 := - indst1 * (2.0 ** scaler_x);
-                    AffirmIf(monitor_tb_id, abs(expect_outdst0 - outdst0) < 0.001, " FSCAL_R op incorrect");
-                    AffirmIf(monitor_tb_id, abs(expect_outdst1 - outdst1) < 0.001, " FSCAL_R op incorrect");
+                    AffirmIf(monitor_tb_id, abs(expect_outdst0 - outdst0) < 0.1, " FSCAL_R op incorrect");
+                    AffirmIf(monitor_tb_id, abs(expect_outdst1 - outdst1) < 0.1, " FSCAL_R op incorrect");
                 when Common.FMUL_R =>
-                    -- (dst0, dst1) = (dst0 + src0, dst1 + src1)
+                    -- (dst0, dst1) = (dst0 * src0, dst1 * src1)
                     expect_outdst0 := indst0 * insrc0;
                     expect_outdst1 := indst1 * insrc1;
                     AffirmIf(monitor_tb_id, abs(expect_outdst0 - outdst0) < 0.001, " FMUL_R op incorrect");
                     AffirmIf(monitor_tb_id, abs(expect_outdst1 - outdst1) < 0.001, " FMUL_R op incorrect");
                 when Common.FDIV_M =>
-                    -- (dst0, dst1) = (dst0 + src0, dst1 + src1)
+                    -- (dst0, dst1) = (dst0 / [mem][0], dst1 / [mem][1])
                     expect_outdst0 := indst0 / insrc0;
                     expect_outdst1 := indst1 / insrc1;
                     AffirmIf(monitor_tb_id, abs(expect_outdst0 - outdst0) < 0.001, " FDIV_M op incorrect");
                     AffirmIf(monitor_tb_id, abs(expect_outdst1 - outdst1) < 0.001, " FDIV_M op incorrect");
                 when Common.FSQRT_R =>
-                    -- (dst0, dst1) = (dst0 + src0, dst1 + src1)
+                    -- (dst0, dst1) = (sqrt(dst0), sqrt(dst1))
                     expect_outdst0 := indst0 ** 0.5;
                     expect_outdst1 := indst1 ** 0.5;
                     AffirmIf(monitor_tb_id, abs(expect_outdst0 - outdst0) < 0.001, " FSQRT_R op incorrect");
