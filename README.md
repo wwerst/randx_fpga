@@ -11,6 +11,8 @@ This contains Github actions automation scripts
 
 This contains various documentation resources, such as the Randomx_Specs.pdf
 
+It also contains a User Manual and a Final Documentation summary pdf for project submission.
+
 ### python_analysis
 
 This is not relevant for EE119c. It is a folder containing some scripts that were
