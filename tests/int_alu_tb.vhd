@@ -64,27 +64,25 @@ architecture behavioral of IntALUTB is
     -- For final testing, run at least 100_000 tests per op.
     constant NUM_TESTS_PER_OP : integer := 5000;
 
-    constant randomWordBin: CovBinType := GenBin(AtLeast => NUM_TESTS_PER_OP, Min => 0, Max => 2**31 - 1, NumBin => 1);
-
     constant TEST_BINS: CovBinType := (
         -- Arithmetic
-        GenBin(Common.RandX_Op_t'POS(  Common.IADD_RS)) & --  randomWordBin, randomWordBin) &
-        GenBin(Common.RandX_Op_t'POS(   Common.IADD_M)) & --  randomWordBin, randomWordBin) &
-        GenBin(Common.RandX_Op_t'POS(   Common.ISUB_R)) & -- randomWordBin, randomWordBin) &
-        GenBin(Common.RandX_Op_t'POS(   Common.ISUB_M)) & -- randomWordBin, randomWordBin) &
-        GenBin(Common.RandX_Op_t'POS(   Common.IMUL_R)) & -- randomWordBin, randomWordBin) &
-        GenBin(Common.RandX_Op_t'POS(   Common.IMUL_M)) & -- randomWordBin, randomWordBin) &
-        GenBin(Common.RandX_Op_t'POS(  Common.IMULH_R)) & -- randomWordBin, randomWordBin) &
-        GenBin(Common.RandX_Op_t'POS(  Common.IMULH_M)) & -- randomWordBin, randomWordBin) &
-        GenBin(Common.RandX_Op_t'POS( Common.ISMULH_R)) & --  randomWordBin, randomWordBin) &
-        GenBin(Common.RandX_Op_t'POS( Common.ISMULH_M)) & --  randomWordBin, randomWordBin) &
-        GenBin(Common.RandX_Op_t'POS( Common.IMUL_RCP)) & --  randomWordBin, randomWordBin) &
-        GenBin(Common.RandX_Op_t'POS(   Common.INEG_R)) & -- randomWordBin, randomWordBin) &
-        GenBin(Common.RandX_Op_t'POS(   Common.IXOR_R)) & -- randomWordBin, randomWordBin) &
-        GenBin(Common.RandX_Op_t'POS(   Common.IXOR_M)) & -- randomWordBin, randomWordBin) &
-        GenBin(Common.RandX_Op_t'POS(   Common.IROR_R)) & -- randomWordBin, randomWordBin) &
-        GenBin(Common.RandX_Op_t'POS(   Common.IROL_R)) & -- randomWordBin, randomWordBin) &
-        GenBin(Common.RandX_Op_t'POS(  Common.ISWAP_R))  -- randomWordBin, randomWordBin)
+        GenBin(Common.RandX_Op_t'POS(  Common.IADD_RS)) &
+        GenBin(Common.RandX_Op_t'POS(   Common.IADD_M)) &
+        GenBin(Common.RandX_Op_t'POS(   Common.ISUB_R)) &
+        GenBin(Common.RandX_Op_t'POS(   Common.ISUB_M)) &
+        GenBin(Common.RandX_Op_t'POS(   Common.IMUL_R)) &
+        GenBin(Common.RandX_Op_t'POS(   Common.IMUL_M)) &
+        GenBin(Common.RandX_Op_t'POS(  Common.IMULH_R)) &
+        GenBin(Common.RandX_Op_t'POS(  Common.IMULH_M)) &
+        GenBin(Common.RandX_Op_t'POS( Common.ISMULH_R)) &
+        GenBin(Common.RandX_Op_t'POS( Common.ISMULH_M)) &
+        GenBin(Common.RandX_Op_t'POS( Common.IMUL_RCP)) &
+        GenBin(Common.RandX_Op_t'POS(   Common.INEG_R)) &
+        GenBin(Common.RandX_Op_t'POS(   Common.IXOR_R)) &
+        GenBin(Common.RandX_Op_t'POS(   Common.IXOR_M)) &
+        GenBin(Common.RandX_Op_t'POS(   Common.IROR_R)) &
+        GenBin(Common.RandX_Op_t'POS(   Common.IROL_R)) &
+        GenBin(Common.RandX_Op_t'POS(  Common.ISWAP_R))
     );
 
     shared variable TestCov : CovPType;
