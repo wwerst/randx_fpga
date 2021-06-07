@@ -55,10 +55,10 @@ jobs:
         ls -la
         git log -1
         /usr/local/lib/ghdl/vendors/compile-osvvm.sh --source /home/runner/work/randx_fpga/osvvm --all --output osvvm
-    - name: Run CPU Full Program Tests
+    - name: Run CPU Loop Engine Tests
       run: |
-        make fullprogram_tests | tee fullprogram_tests.txt
-        cat fullprogram_tests.txt | grep -c -i -E "Alert|error|failed" | grep -q "^0$"
+        make loop_engine_tests | tee loop_engine_tests.txt
+        cat loop_engine_tests.txt | grep -c -i -E "Alert|error|failed" | grep -q "^0$"
     - name: Run Int ALU Tests
       run: |
         make int_alu_tests | tee int_alu_tests.txt

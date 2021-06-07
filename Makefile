@@ -18,11 +18,6 @@ import: clean
 	ghdl -i ${GHDL_OPTIONS} src/loop_engine/*.vhd
 	ghdl -i ${GHDL_OPTIONS} src/hash_engine/*.vhd
 
-fullprogram_tests: import
-	ghdl -m ${GHDL_OPTIONS} -o bin/full_program_tb.so full_program_tb
-	ghdl -e ${GHDL_OPTIONS} -shared -Wl,-Wl,-u,ghdl_main -o bin/full_program_tb full_program_tb
-	python3 tests/program_tb.py
-
 loop_engine_tests: import
 	ghdl -m ${GHDL_OPTIONS} -o bin/loop_engine_tb.so LoopEngineTB
 	ghdl -e ${GHDL_OPTIONS} -shared -Wl,-Wl,-u,ghdl_main -o bin/loop_engine_tb LoopEngineTB
