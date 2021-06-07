@@ -10,6 +10,7 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 use work.Common;
+use work.RdxCfg;
 
 entity Scratchpad is
 
@@ -25,9 +26,13 @@ entity Scratchpad is
 end Scratchpad;
 
 architecture dataflow of Scratchpad is
-    subtype memory_arr_t is array (0 to SIZE_SPAD_ADDR-1) of Common.QWord_t;
-    signal memory_s : memory_arr_t
+    type memory_arr_t is array (0 to 2 ** Common.SIZE_SPAD_ADDR - 1) of Common.QWord_t;
+    signal memory_s : memory_arr_t;
+
+    signal addr_int : integer range 0 to RdxCfg.LOG2_RANDOMX_SCRATCHPAD_L3 / 8;
 begin
+
+    addr_int <= to_integer(unsigned(spad_addr));
 
     ReadWriteProc: process(clk)
     begin
@@ -35,10 +40,10 @@ begin
         spad_rd_valid <= '0';
         if rising_edge(clk) then
             if spad_rd_en = '1' then
-                spad_rd <= memory_s(spad_addr);
+                spad_rd <= memory_s(addr_int);
                 spad_rd_valid <= '1';
             else
-                memory_s(spad_addr) <= spad_wr;
+                memory_s(addr_int) <= spad_wr;
             end if;
         end if;
     end process;

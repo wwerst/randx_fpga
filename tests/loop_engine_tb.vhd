@@ -51,7 +51,7 @@ architecture behavioral of LoopEngineTB is
             );
     end component;
 
-    component Scratchpad
+    component ScratchpadUnBound
         port (
             clk     : in    std_logic;
             reset   : in    std_logic;
@@ -158,7 +158,7 @@ begin
             reg_table_out  => reg_table_out
     );
 
-    externScratchpad: Scratchpad port map
+    externScratchpad: ScratchpadUnbound port map
         (
             clk           => clk,
             reset         => reset,

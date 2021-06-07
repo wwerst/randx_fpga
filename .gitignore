@@ -12,6 +12,7 @@ bin/
 *.o
 floatalutb
 intalutb
+scratchpadtb
 
 # VHDL wave files
 *.vcd

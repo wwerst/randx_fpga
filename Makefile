@@ -17,6 +17,7 @@ import: clean
 	ghdl -i ${GHDL_OPTIONS} src/alu/*.vhd
 	ghdl -i ${GHDL_OPTIONS} src/loop_engine/*.vhd
 	ghdl -i ${GHDL_OPTIONS} src/hash_engine/*.vhd
+	ghdl -i ${GHDL_OPTIONS} src/scratchpad/*.vhd
 
 loop_engine_tests: import
 	ghdl -m ${GHDL_OPTIONS} -o bin/loop_engine_tb.so LoopEngineTB
@@ -30,6 +31,10 @@ float_alu_tests: import
 int_alu_tests: import
 	ghdl -m ${GHDL_OPTIONS} IntALUTB
 	ghdl -r ${GHDL_OPTIONS} IntALUTB --wave=int_alu_tests.ghw --vcd=int_alu_tests.vcd
+
+scratchpad_tests: import
+	ghdl -m ${GHDL_OPTIONS} ScratchpadTB
+	ghdl -r ${GHDL_OPTIONS} ScratchpadTB --wave=scratchpad_tests.ghw --vcd=scratchpad_tests.vcd
 
 continuous_tests:
 	fswatch -m poll_monitor -0 -o src/* | xargs -0 -n1 bash -c "clear && echo '*****************Running Tests***************************' && make cpu_fullprogram_tests"
