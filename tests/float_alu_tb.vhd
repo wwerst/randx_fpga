@@ -77,8 +77,15 @@ architecture behavioral of FloatALUTB is
 
     constant TEST_BINS: CovBinType := (
         -- Arithmetic
+        --GenBin(Common.RandX_Op_t'POS(  Common.FSWAP_R)) &
         GenBin(Common.RandX_Op_t'POS(   Common.FADD_R)) &
         GenBin(Common.RandX_Op_t'POS(   Common.FADD_M))
+        --GenBin(Common.RandX_Op_t'POS(   Common.FSUB_R)) &
+        --GenBin(Common.RandX_Op_t'POS(   Common.FSUB_M)) &
+        --GenBin(Common.RandX_Op_t'POS(  Common.FSCAL_R)) &
+        --GenBin(Common.RandX_Op_t'POS(   Common.FMUL_R)) &
+        --GenBin(Common.RandX_Op_t'POS(   Common.FDIV_M)) &
+        --GenBin(Common.RandX_Op_t'POS(  Common.FSQRT_R))
     );
 
     shared variable TestCov : CovPType;
@@ -169,6 +176,7 @@ begin
         variable outdst1 : real;
         variable expect_outdst0 : real;
         variable expect_outdst1 : real;
+        variable inInst  : Common.ReducedInst_t;
     begin
         monitor_tb_id := GetAlertLogID("floatAluTestbench", ALERTLOG_BASE_ID);
         while not done loop
@@ -178,20 +186,30 @@ begin
             insrc1 := floatALU_inSrc1_real;
             indst0 := floatALU_inDst0_real;
             indst1 := floatALU_inDst1_real;
-            wait until floatALU_inTag.valid = '1';
+            inInst := floatALU_inInst;
+            wait until floatALU_outTag.valid = '1';
+            wait for 0 ns; -- Wait delta cycle for floatALU_outDst*_real to propagate.
             outdst0 := floatALU_outDst0_real;
             outdst1 := floatALU_outDst1_real;
-            case floatALU_inInst.opcode is
-                when Common.FADD_M =>
-                    expect_outdst0 := indst0 + insrc0;
-                    expect_outdst1 := indst1 + insrc1;
-                    AffirmIf(monitor_tb_id, abs(expect_outdst0 - outdst0) < 0.001, " FADD_M op incorrect");
-                    AffirmIf(monitor_tb_id, abs(expect_outdst1 - outdst1) < 0.001, " FADD_M op incorrect");
+            case inInst.opcode is
+                when Common.FSWAP_R =>
+                    -- (dst0, dst1) = (dst1, dst0)
+                    expect_outdst0 := indst1;
+                    expect_outdst1 := indst0;
+                    AffirmIf(monitor_tb_id, abs(expect_outdst0 - outdst0) < 0.001, " FSWAP_R op incorrect");
+                    AffirmIf(monitor_tb_id, abs(expect_outdst1 - outdst1) < 0.001, " FSWAP_R op incorrect");
                 when Common.FADD_R =>
+                    -- (dst0, dst1) = (dst0 + src0, dst1 + src1)
                     expect_outdst0 := indst0 + insrc0;
                     expect_outdst1 := indst1 + insrc1;
                     AffirmIf(monitor_tb_id, abs(expect_outdst0 - outdst0) < 0.001, " FADD_R op incorrect");
                     AffirmIf(monitor_tb_id, abs(expect_outdst1 - outdst1) < 0.001, " FADD_R op incorrect");
+                when Common.FADD_M =>
+                    -- (dst0, dst1) = (dst0 + [mem][0], dst1 + [mem][1])
+                    expect_outdst0 := indst0 + insrc0;
+                    expect_outdst1 := indst1 + insrc1;
+                    AffirmIf(monitor_tb_id, abs(expect_outdst0 - outdst0) < 0.001, " FADD_M op incorrect");
+                    AffirmIf(monitor_tb_id, abs(expect_outdst1 - outdst1) < 0.001, " FADD_M op incorrect");
                 when others =>
                     AffirmIf(monitor_tb_id, FALSE, " Unexpected opcode sent ");
             end case;

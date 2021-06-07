@@ -63,3 +63,7 @@ jobs:
       run: |
         make int_alu_tests | tee int_alu_tests.txt
         cat int_alu_tests.txt | grep -c -i -E "Alert|error|failed" | grep -q "^0$"
+    - name: Run Float ALU Tests
+      run: |
+        make float_alu_tests | tee float_alu_tests.txt
+        cat float_alu_tests.txt | grep -c -i -E "Alert|error|failed" | grep -q "^0$"

@@ -169,6 +169,7 @@ begin
         variable expect_signed : signed(63 downto 0);
         variable expect_signed_128 : signed(127 downto 0);
         variable rotate_int    : integer;
+        variable inInst        : Common.ReducedInst_t;
     begin
         monitor_tb_id := GetAlertLogID("IntAluTestbench", ALERTLOG_BASE_ID);
         while not done loop
@@ -178,10 +179,12 @@ begin
             unsigned_indst := unsigned(intALU_inDst);
             signed_insrc := signed(intALU_inSrc);
             signed_indst := signed(intALU_inDst);
+            inInst := intALU_inInst;
             wait until intALU_outTag.valid = '1';
+            wait for 0 ns; -- Wait delta cycle for signals to propagate
             unsigned_outdst := unsigned(intALU_outDst);
             signed_outdst := signed(intALU_outDst);
-            case intALU_inInst.opcode is
+            case inInst.opcode is
                 when Common.IADD_RS =>
                     rotate_int := to_integer(intALU_inInst.mod_shift);
                     expect_signed := (signed_indst + signed_insrc sll rotate_int);
