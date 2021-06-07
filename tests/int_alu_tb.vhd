@@ -64,27 +64,25 @@ architecture behavioral of IntALUTB is
     -- For final testing, run at least 100_000 tests per op.
     constant NUM_TESTS_PER_OP : integer := 5000;
 
-    constant randomWordBin: CovBinType := GenBin(AtLeast => NUM_TESTS_PER_OP, Min => 0, Max => 2**31 - 1, NumBin => 1);
-
     constant TEST_BINS: CovBinType := (
         -- Arithmetic
-        GenBin(Common.RandX_Op_t'POS(  Common.IADD_RS)) & --  randomWordBin, randomWordBin) &
-        GenBin(Common.RandX_Op_t'POS(   Common.IADD_M)) & --  randomWordBin, randomWordBin) &
-        GenBin(Common.RandX_Op_t'POS(   Common.ISUB_R)) & -- randomWordBin, randomWordBin) &
-        GenBin(Common.RandX_Op_t'POS(   Common.ISUB_M)) & -- randomWordBin, randomWordBin) &
-        GenBin(Common.RandX_Op_t'POS(   Common.IMUL_R)) & -- randomWordBin, randomWordBin) &
-        GenBin(Common.RandX_Op_t'POS(   Common.IMUL_M)) & -- randomWordBin, randomWordBin) &
-        GenBin(Common.RandX_Op_t'POS(  Common.IMULH_R)) & -- randomWordBin, randomWordBin) &
-        GenBin(Common.RandX_Op_t'POS(  Common.IMULH_M)) & -- randomWordBin, randomWordBin) &
-        GenBin(Common.RandX_Op_t'POS( Common.ISMULH_R)) & --  randomWordBin, randomWordBin) &
-        GenBin(Common.RandX_Op_t'POS( Common.ISMULH_M)) & --  randomWordBin, randomWordBin) &
-        GenBin(Common.RandX_Op_t'POS( Common.IMUL_RCP)) & --  randomWordBin, randomWordBin) &
-        GenBin(Common.RandX_Op_t'POS(   Common.INEG_R)) & -- randomWordBin, randomWordBin) &
-        GenBin(Common.RandX_Op_t'POS(   Common.IXOR_R)) & -- randomWordBin, randomWordBin) &
-        GenBin(Common.RandX_Op_t'POS(   Common.IXOR_M)) & -- randomWordBin, randomWordBin) &
-        GenBin(Common.RandX_Op_t'POS(   Common.IROR_R)) & -- randomWordBin, randomWordBin) &
-        GenBin(Common.RandX_Op_t'POS(   Common.IROL_R)) & -- randomWordBin, randomWordBin) &
-        GenBin(Common.RandX_Op_t'POS(  Common.ISWAP_R))  -- randomWordBin, randomWordBin)
+        GenBin(Common.RandX_Op_t'POS(  Common.IADD_RS)) &
+        GenBin(Common.RandX_Op_t'POS(   Common.IADD_M)) &
+        GenBin(Common.RandX_Op_t'POS(   Common.ISUB_R)) &
+        GenBin(Common.RandX_Op_t'POS(   Common.ISUB_M)) &
+        GenBin(Common.RandX_Op_t'POS(   Common.IMUL_R)) &
+        GenBin(Common.RandX_Op_t'POS(   Common.IMUL_M)) &
+        GenBin(Common.RandX_Op_t'POS(  Common.IMULH_R)) &
+        GenBin(Common.RandX_Op_t'POS(  Common.IMULH_M)) &
+        GenBin(Common.RandX_Op_t'POS( Common.ISMULH_R)) &
+        GenBin(Common.RandX_Op_t'POS( Common.ISMULH_M)) &
+        GenBin(Common.RandX_Op_t'POS( Common.IMUL_RCP)) &
+        GenBin(Common.RandX_Op_t'POS(   Common.INEG_R)) &
+        GenBin(Common.RandX_Op_t'POS(   Common.IXOR_R)) &
+        GenBin(Common.RandX_Op_t'POS(   Common.IXOR_M)) &
+        GenBin(Common.RandX_Op_t'POS(   Common.IROR_R)) &
+        GenBin(Common.RandX_Op_t'POS(   Common.IROL_R)) &
+        GenBin(Common.RandX_Op_t'POS(  Common.ISWAP_R))
     );
 
     shared variable TestCov : CovPType;
@@ -171,6 +169,7 @@ begin
         variable expect_signed : signed(63 downto 0);
         variable expect_signed_128 : signed(127 downto 0);
         variable rotate_int    : integer;
+        variable inInst        : Common.ReducedInst_t;
     begin
         monitor_tb_id := GetAlertLogID("IntAluTestbench", ALERTLOG_BASE_ID);
         while not done loop
@@ -180,10 +179,12 @@ begin
             unsigned_indst := unsigned(intALU_inDst);
             signed_insrc := signed(intALU_inSrc);
             signed_indst := signed(intALU_inDst);
+            inInst := intALU_inInst;
             wait until intALU_outTag.valid = '1';
+            wait for 0 ns; -- Wait delta cycle for signals to propagate
             unsigned_outdst := unsigned(intALU_outDst);
             signed_outdst := signed(intALU_outDst);
-            case intALU_inInst.opcode is
+            case inInst.opcode is
                 when Common.IADD_RS =>
                     rotate_int := to_integer(intALU_inInst.mod_shift);
                     expect_signed := (signed_indst + signed_insrc sll rotate_int);

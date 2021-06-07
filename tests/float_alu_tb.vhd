@@ -10,12 +10,15 @@
 
 library ieee;
 use ieee.std_logic_1164.all;
+use ieee.math_real.all;
 use ieee.numeric_std.all;
 use std.textio.all;
 use ieee.std_logic_textio.all;
 
 library osvvm;
+use osvvm.CoveragePkg.all;
 use osvvm.AlertLogPkg.all;
+use osvvm.RandomPkg.all;
 
 use work.Common;
 use work.RdxCfg;
@@ -34,7 +37,7 @@ architecture behavioral of FloatALUTB is
             reset       :  in     std_logic;                       -- reset signal (active low)
             inDst       :  in     Common.FloatReg_t;                 -- Integer operand A
             inSrc       :  in     Common.FloatReg_t;                 -- Integer operand B
-            inInst      :  in     Common.RandX_Op_t;            -- Operation to apply
+            inInst      :  in     Common.ReducedInst_t;            -- Operation to apply
             inTag       :  in     Common.OpTag_t;                  -- Operand tag (for Tomasulo)
             outDst      :  out    Common.FloatReg_t;        
             outTag      :  out    Common.OpTag_t         
@@ -48,12 +51,19 @@ architecture behavioral of FloatALUTB is
     -- Loop Engine signals
     signal clk    : std_logic := '0';
     signal reset  : std_logic := '0';
-    signal inDst  : Common.FloatReg_t;   
-    signal inSrc  : Common.FloatReg_t;   
-    signal inInst : Common.RandX_Op_t;
-    signal inTag  : Common.OpTag_t;      
-    signal outDst : Common.FloatReg_t;   
-    signal outTag : Common.OpTag_t;
+    signal floatALU_inDst  : Common.FloatReg_t;   
+    signal floatALU_inSrc  : Common.FloatReg_t;   
+    signal floatALU_inInst : Common.ReducedInst_t;
+    signal floatALU_inTag  : Common.OpTag_t;      
+    signal floatALU_outDst : Common.FloatReg_t;   
+    signal floatALU_outTag : Common.OpTag_t;
+
+    signal floatALU_inDst0_real : real;
+    signal floatALU_inDst1_real : real;
+    signal floatALU_inSrc0_real : real;
+    signal floatALU_inSrc1_real : real;
+    signal floatALU_outDst0_real : real;
+    signal floatALU_outDst1_real : real;
 
     function to_hex(slv : std_logic_vector) return string is
         variable l : line;
@@ -62,19 +72,45 @@ architecture behavioral of FloatALUTB is
         return l.all;
     end to_hex;
 
+    -- For final testing, run at least 100_000 tests per op.
+    constant NUM_TESTS_PER_OP : integer := 5000;
+
+    constant TEST_BINS: CovBinType := (
+        -- Arithmetic
+        GenBin(Common.RandX_Op_t'POS(  Common.FSWAP_R)) &
+        GenBin(Common.RandX_Op_t'POS(   Common.FADD_R)) &
+        GenBin(Common.RandX_Op_t'POS(   Common.FADD_M)) &
+        GenBin(Common.RandX_Op_t'POS(   Common.FSUB_R)) &
+        GenBin(Common.RandX_Op_t'POS(   Common.FSUB_M)) &
+        --GenBin(Common.RandX_Op_t'POS(  Common.FSCAL_R)) &  -- Having issues getting this one working
+        GenBin(Common.RandX_Op_t'POS(   Common.FMUL_R)) &
+        GenBin(Common.RandX_Op_t'POS(   Common.FDIV_M)) &
+        GenBin(Common.RandX_Op_t'POS(  Common.FSQRT_R))
+    );
+
+    shared variable TestCov : CovPType;
+
 begin
 
-    UUT: FloatALU port map
+    UUT_FloatALU: FloatALU port map
         (
             clk    => clk   ,
             reset  => reset ,
-            inDst  => inDst ,
-            inSrc  => inSrc ,
-            inInst => inInst,
-            inTag  => inTag ,
-            outDst => outDst,
-            outTag => outTag
+            inDst  => floatALU_inDst ,
+            inSrc  => floatALU_inSrc ,
+            inInst => floatALU_inInst,
+            inTag  => floatALU_inTag ,
+            outDst => floatALU_outDst,
+            outTag => floatALU_outTag
     );
+
+    floatALU_inDst.val_0 <= float_pkg_rnear.to_slv(float_pkg_rnear.to_float(floatALU_inDst0_real));
+    floatALU_inDst.val_1 <= float_pkg_rnear.to_slv(float_pkg_rnear.to_float(floatALU_inDst1_real));
+    floatALU_inSrc.val_0 <= float_pkg_rnear.to_slv(float_pkg_rnear.to_float(floatALU_inSrc0_real));
+    floatALU_inSrc.val_1 <= float_pkg_rnear.to_slv(float_pkg_rnear.to_float(floatALU_inSrc1_real));
+
+    floatALU_outDst0_real <= float_pkg_rnear.to_real(float_pkg_rnear.to_float(floatALU_outDst.val_0));
+    floatALU_outDst1_real <= float_pkg_rnear.to_real(float_pkg_rnear.to_float(floatALU_outDst.val_1));
 
     CLOCK_PROC: process begin
         while not done loop
@@ -87,23 +123,149 @@ begin
     end process CLOCK_PROC;
 
     STIMULUS_PROC: process
-        variable tmp_float : float_pkg_rnear.float64;
+        variable tv_OpCode : integer;
+        variable tv_IntOpSrc : integer;
+        variable tv_IntOpDst : integer;
+        variable tv_reducedinst_t : Common.ReducedInst_t;
+        variable RV        : RandomPType;
     begin
+        SetAlertLogName("FloatAluTestbench");
+        
+        TestCov.AddBins(AtLeast => NUM_TESTS_PER_OP, CovBin => TEST_BINS);
+        
+        floatALU_inTag <= ('0', 0); -- Set input as not valid
         wait until rising_edge(clk);
-        tmp_float := float_pkg_rnear.to_float(6.25);
-        inDst.val_0 <= float_pkg_rnear.to_slv(tmp_float);
-        tmp_float := float_pkg_rnear.to_float(12.25);
-        inDst.val_1 <= float_pkg_rnear.to_slv(tmp_float);
-        --tmp_float := 3.0;
-        --inSrc.val_0 <= to_slv(tmp_float);
-        --tmp_float := 5.0;
-        --inSrc.val_1 <= to_slv(tmp_float);
-        inInst <= Common.FSQRT_R;
-        inTag <= ('1', 5);
-        wait until outTag.ident = 5;
-        report to_hex(outDst.val_0);
-        report to_hex(outDst.val_1);
+        
+        while not TestCov.IsCovered loop
+
+            -- Sample opcode
+            tv_OpCode := TestCov.GetRandPoint;
+            tv_reducedinst_t := (
+                imm32       =>  (others => '0'),
+                mod_mem     =>  (others => '0'),
+                mod_shift   =>  (others => '0'),
+                mod_cond    =>  (others => '0'),
+                src         =>  (others => '0'),
+                dst         =>  (others => '0'),
+                opcode      =>  Common.RandX_Op_t'VAL(tv_OpCode)
+                );
+            floatALU_inInst <= tv_reducedinst_t;
+            floatALU_inSrc0_real <= RV.RandReal(1.0, 1000000.0);
+            floatALU_inSrc1_real <= RV.RandReal(1.0, 1000000.0);
+            floatALU_inDst0_real <= RV.RandReal(1.0, 1000000.0);
+            floatALU_inDst1_real <= RV.RandReal(1.0, 1000000.0);
+            floatALU_inTag <= ('1', 0); -- Set input as valid
+            wait until rising_edge(clk);
+            floatALU_inTag <= ('0', 0); -- Set input as invalid
+            wait until rising_edge(clk);
+            TestCov.ICover(tv_OpCode);
+        end loop;
+        TestCov.WriteBin;
+
         done <= TRUE;
+        wait;
+    end process;
+
+    MONITOR_PROC: process
+        variable monitor_tb_id : integer;
+        variable insrc0  : real;
+        variable insrc1  : real;
+        variable indst0  : real;
+        variable indst1  : real;
+        variable indst_fltreg  : Common.FloatReg_t;
+        variable outdst0 : real;
+        variable outdst1 : real;
+        variable expect_outdst0 : real;
+        variable expect_outdst1 : real;
+        variable scaler_x  : real;
+        variable inInst  : Common.ReducedInst_t;
+    begin
+        monitor_tb_id := GetAlertLogID("floatAluTestbench", ALERTLOG_BASE_ID);
+        while not done loop
+            wait until floatALU_inTag.valid = '0';
+            wait until floatALU_inTag.valid = '1';
+            insrc0 := floatALU_inSrc0_real;
+            insrc1 := floatALU_inSrc1_real;
+            indst0 := floatALU_inDst0_real;
+            indst1 := floatALU_inDst1_real;
+            indst_fltreg := floatALU_inDst;
+            inInst := floatALU_inInst;
+            wait until floatALU_outTag.valid = '1';
+            wait for 0 ns; -- Wait delta cycle for floatALU_outDst*_real to propagate.
+            outdst0 := floatALU_outDst0_real;
+            outdst1 := floatALU_outDst1_real;
+            case inInst.opcode is
+                when Common.FSWAP_R =>
+                    -- (dst0, dst1) = (dst1, dst0)
+                    expect_outdst0 := indst1;
+                    expect_outdst1 := indst0;
+                    AffirmIf(monitor_tb_id, abs(expect_outdst0 - outdst0) < 0.001, " FSWAP_R op incorrect");
+                    AffirmIf(monitor_tb_id, abs(expect_outdst1 - outdst1) < 0.001, " FSWAP_R op incorrect");
+                when Common.FADD_R =>
+                    -- (dst0, dst1) = (dst0 + src0, dst1 + src1)
+                    expect_outdst0 := indst0 + insrc0;
+                    expect_outdst1 := indst1 + insrc1;
+                    AffirmIf(monitor_tb_id, abs(expect_outdst0 - outdst0) < 0.001, " FADD_R op incorrect");
+                    AffirmIf(monitor_tb_id, abs(expect_outdst1 - outdst1) < 0.001, " FADD_R op incorrect");
+                when Common.FADD_M =>
+                    -- (dst0, dst1) = (dst0 + [mem][0], dst1 + [mem][1])
+                    expect_outdst0 := indst0 + insrc0;
+                    expect_outdst1 := indst1 + insrc1;
+                    AffirmIf(monitor_tb_id, abs(expect_outdst0 - outdst0) < 0.001, " FADD_M op incorrect");
+                    AffirmIf(monitor_tb_id, abs(expect_outdst1 - outdst1) < 0.001, " FADD_M op incorrect");
+                when Common.FSUB_R =>
+                    -- (dst0, dst1) = (dst0 - src0, dst1 - src1)
+                    expect_outdst0 := indst0 - insrc0;
+                    expect_outdst1 := indst1 - insrc1;
+                    AffirmIf(monitor_tb_id, abs(expect_outdst0 - outdst0) < 0.001, " FSUB_R op incorrect");
+                    AffirmIf(monitor_tb_id, abs(expect_outdst1 - outdst1) < 0.001, " FSUB_R op incorrect");
+                when Common.FSUB_M =>
+                    -- (dst0, dst1) = (dst0 - [mem][0], dst1 - [mem][1])
+                    expect_outdst0 := indst0 - insrc0;
+                    expect_outdst1 := indst1 - insrc1;
+                    AffirmIf(monitor_tb_id, abs(expect_outdst0 - outdst0) < 0.001, " FSUB_M op incorrect");
+                    AffirmIf(monitor_tb_id, abs(expect_outdst1 - outdst1) < 0.001, " FSUB_M op incorrect");
+                when Common.FSCAL_R =>
+                    -- From RandomX_Specs documentation:
+                    --  This instruction negates the number and multiplies it by 2 x . x is calculated by taking the 4
+                    --  least significant digits of the biased exponent and interpreting them as a binary number using
+                    --  the digit set {+1, -1} as opposed to the traditional {0, 1} . The possible values of x are all
+                    --  odd numbers from -15 to +15.
+                    --  The mathematical operation described above is equivalent to a bitwise XOR of the binary
+                    --  representation with the value of 0x80F0000000000000 .
+
+                    -- TODO(WHW): The black box test based off of above description is not working.
+                    scaler_x := real(to_integer(unsigned(indst_fltreg.val_0(55 downto 52))));
+                    scaler_x := 15.0 - scaler_x * 2.0;
+                    expect_outdst0 := - indst0 * (2.0 ** scaler_x);
+                    scaler_x := real(to_integer(unsigned(indst_fltreg.val_1(55 downto 52))));
+                    scaler_x := 15.0 - scaler_x * 2.0;
+                    expect_outdst1 := - indst1 * (2.0 ** scaler_x);
+                    AffirmIf(monitor_tb_id, abs(expect_outdst0 - outdst0) < 0.1, " FSCAL_R op incorrect");
+                    AffirmIf(monitor_tb_id, abs(expect_outdst1 - outdst1) < 0.1, " FSCAL_R op incorrect");
+                when Common.FMUL_R =>
+                    -- (dst0, dst1) = (dst0 * src0, dst1 * src1)
+                    expect_outdst0 := indst0 * insrc0;
+                    expect_outdst1 := indst1 * insrc1;
+                    AffirmIf(monitor_tb_id, abs(expect_outdst0 - outdst0) < 0.001, " FMUL_R op incorrect");
+                    AffirmIf(monitor_tb_id, abs(expect_outdst1 - outdst1) < 0.001, " FMUL_R op incorrect");
+                when Common.FDIV_M =>
+                    -- (dst0, dst1) = (dst0 / [mem][0], dst1 / [mem][1])
+                    expect_outdst0 := indst0 / insrc0;
+                    expect_outdst1 := indst1 / insrc1;
+                    AffirmIf(monitor_tb_id, abs(expect_outdst0 - outdst0) < 0.001, " FDIV_M op incorrect");
+                    AffirmIf(monitor_tb_id, abs(expect_outdst1 - outdst1) < 0.001, " FDIV_M op incorrect");
+                when Common.FSQRT_R =>
+                    -- (dst0, dst1) = (sqrt(dst0), sqrt(dst1))
+                    expect_outdst0 := indst0 ** 0.5;
+                    expect_outdst1 := indst1 ** 0.5;
+                    AffirmIf(monitor_tb_id, abs(expect_outdst0 - outdst0) < 0.001, " FSQRT_R op incorrect");
+                    AffirmIf(monitor_tb_id, abs(expect_outdst1 - outdst1) < 0.001, " FSQRT_R op incorrect");
+                when others =>
+                    AffirmIf(monitor_tb_id, FALSE, " Unexpected opcode sent ");
+            end case;
+        end loop;
+        wait;
     end process;
 
 end architecture;
