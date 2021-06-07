@@ -43,6 +43,9 @@ xmrig_test_bench_rebuild: xmrig_test_bench_clean
 xmrig_test_bench_build:
 	cd xmrig_copied_src/build && cmake .. && make -j24
 
+loop_engine_hex_test_files:
+	./xmrig_copied_src/build/test_script
+
 documentation:
 	rm -rf doxy_out
 	doxygen docs/Doxyfile
