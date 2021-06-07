@@ -143,6 +143,9 @@ begin
             if spad_rd_en = '1' and spad_rd_valid = '1' then
                 spad_addr_int := to_integer(unsigned(spad_addr));
                 AffirmIf(monitor_tb_id, std_match(tb_scratchpad_arr(spad_addr_int), spad_rd), "Value mismatch");
+                if not Is_X(tb_scratchpad_arr(spad_addr_int)) then
+                    report "Good read";
+                end if;
             end if;
         end loop;
         wait;

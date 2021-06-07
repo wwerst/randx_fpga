@@ -34,7 +34,7 @@ architecture dataflow of Scratchpad is
     type memory_arr_t is array (0 to 2 ** Common.SIZE_SPAD_ADDR - 1) of Common.QWord_t;
     signal memory_s : memory_arr_t;
 
-    signal addr_int : integer range 0 to RdxCfg.LOG2_RANDOMX_SCRATCHPAD_L3 / 8;
+    signal addr_int : integer range 0 to 2 ** Common.SIZE_SPAD_ADDR - 1;
 begin
 
     addr_int <= to_integer(unsigned(spad_addr));
