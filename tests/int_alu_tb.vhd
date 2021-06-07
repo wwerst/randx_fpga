@@ -15,7 +15,7 @@ use ieee.std_logic_textio.all;
 library osvvm;
 use osvvm.CoveragePkg.all;
 use osvvm.AlertLogPkg.all;
-use osvvm.RandomPkg;
+use osvvm.RandomPkg.all;
 
 use work.Common;
 use work.RdxCfg;
@@ -52,7 +52,6 @@ architecture behavioral of IntALUTB is
     signal intALU_inTag  :  Common.OpTag_t;
     signal intALU_outDst :  Common.IntReg_t;
     signal intALU_outTag :  Common.OpTag_t;
-
 
 
     function to_hex(slv : std_logic_vector) return string is
@@ -122,14 +121,18 @@ begin
         variable tv_IntOpSrc : integer;
         variable tv_IntOpDst : integer;
         variable tv_reducedinst_t : Common.ReducedInst_t;
+        variable RV        : RandomPType;
     begin
         SetAlertLogName("IntAluTestbench");
         
         TestCov.AddBins(AtLeast => NUM_TESTS_PER_OP, CovBin => TEST_BINS);
         
+        intALU_inTag <= ('0', 0); -- Set input as not valid
         wait until rising_edge(clk);
         
         while not TestCov.IsCovered loop
+
+            -- Sample opcode
             tv_OpCode := TestCov.GetRandPoint;
             tv_reducedinst_t := (
                 imm32       =>  (others => '0'),
@@ -141,8 +144,12 @@ begin
                 opcode      =>  Common.RandX_Op_t'VAL(tv_OpCode)
                 );
             intALU_inInst <= tv_reducedinst_t;
+            intALU_inDst <= RV.RandSlv(Size => 64);
+            intALU_inSrc <= RV.RandSlv(Size => 64);
+            intALU_inTag <= ('1', 0); -- Set input as valid
             wait until rising_edge(clk);
-
+            intALU_inTag <= ('0', 0); -- Set input as invalid
+            wait until rising_edge(clk);
             TestCov.ICover(tv_OpCode);
         end loop;
         TestCov.WriteBin;
@@ -152,7 +159,29 @@ begin
     end process;
 
     MONITOR_PROC: process
+        variable monitor_tb_id : integer;
+        variable unsigned_insrc  : unsigned(63 downto 0);
+        variable unsigned_indst  : unsigned(63 downto 0);
+        variable unsigned_outdst : unsigned(63 downto 0);
+        variable expect_unsigned : unsigned(63 downto 0);
     begin
+        monitor_tb_id := GetAlertLogID("IntAluTestbench", ALERTLOG_BASE_ID);
+        while not done loop
+            wait until intALU_inTag.valid = '0';
+            wait until intALU_inTag.valid = '1';
+            unsigned_insrc := unsigned(intALU_inSrc);
+            unsigned_indst := unsigned(intALU_inDst);
+            wait until intALU_outTag.valid = '1';
+            unsigned_outdst := unsigned(intALU_outDst);
+            case intALU_inInst.opcode is
+                when Common.IADD_M =>
+                    expect_unsigned := (unsigned_insrc + unsigned_indst);
+                    AffirmIf(monitor_tb_id, unsigned_outdst = expect_unsigned, " Add op incorrect");
+                when others =>
+                    null;
+                    --AffirmIf(monitor_tb_id, FALSE, " Unexpected opcode sent ");
+            end case;
+        end loop;
         wait;
     end process;
 
