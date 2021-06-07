@@ -11,6 +11,7 @@ bin/
 # GHDL Build files
 *.o
 floatalutb
+intalutb
 
 # VHDL wave files
 *.vcd

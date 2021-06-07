@@ -1,9 +1,38 @@
 # randx_fpga
 RandomX FPGA Accelerator
 
+## Folder Documentation
+
+### .github
+
+This contains Github actions automation scripts
+
+### docs
+
+This contains various documentation resources, such as the Randomx_Specs.pdf
+
+### python_analysis
+
+This is not relevant for EE119c. It is a folder containing some scripts that were
+used to look at dependencies of instructions, but stale now.
+
+### src
+
+This contains source code for the VHDL implementation.
+
+### tests
+
+This contains VHDL test benches for code in the source code folder.
+
+### xmrig_copied_src
+
+This is a folder that is modified from a copy of https://github.com/xmrig/xmrig
+
+It is used to generate oracle program outputs for test benches.
+
 ## Documentation System
 
-This project uses doxygen for generating documentation. See https://www.doxygen.nl/manual/docblocks.html#vhdlblocks
+This project uses doxygen for generating some of its documentation. See https://www.doxygen.nl/manual/docblocks.html#vhdlblocks
 
 For Doxygen comment commands, see https://www.doxygen.nl/manual/commands.html
 

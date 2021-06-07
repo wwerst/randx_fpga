@@ -32,6 +32,10 @@ float_alu_tests: import
 	ghdl -m ${GHDL_OPTIONS} FloatALUTB
 	ghdl -r ${GHDL_OPTIONS} FloatALUTB --wave=float_alu_tests.ghw --vcd=float_alu_tests.vcd
 
+int_alu_tests: import
+	ghdl -m ${GHDL_OPTIONS} IntALUTB
+	ghdl -r ${GHDL_OPTIONS} IntALUTB --wave=int_alu_tests.ghw --vcd=int_alu_tests.vcd
+
 continuous_tests:
 	fswatch -m poll_monitor -0 -o src/* | xargs -0 -n1 bash -c "clear && echo '*****************Running Tests***************************' && make cpu_fullprogram_tests"
 
