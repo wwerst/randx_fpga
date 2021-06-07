@@ -76,7 +76,6 @@ architecture behavioral of FloatALUTB is
     constant NUM_TESTS_PER_OP : integer := 5000;
 
     constant TEST_BINS: CovBinType := (
-        -- Arithmetic
         GenBin(Common.RandX_Op_t'POS(  Common.FSWAP_R)) &
         GenBin(Common.RandX_Op_t'POS(   Common.FADD_R)) &
         GenBin(Common.RandX_Op_t'POS(   Common.FADD_M)) &

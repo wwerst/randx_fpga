@@ -65,7 +65,6 @@ architecture behavioral of IntALUTB is
     constant NUM_TESTS_PER_OP : integer := 5000;
 
     constant TEST_BINS: CovBinType := (
-        -- Arithmetic
         GenBin(Common.RandX_Op_t'POS(  Common.IADD_RS)) &
         GenBin(Common.RandX_Op_t'POS(   Common.IADD_M)) &
         GenBin(Common.RandX_Op_t'POS(   Common.ISUB_R)) &
